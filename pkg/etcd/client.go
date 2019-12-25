@@ -6,20 +6,20 @@ import (
 	"go.etcd.io/etcd/client"
 )
 
-// APIClient defineds api client for set/get operations
-type APIClient struct {
+// Client defineds api client for set/get operations
+type Client struct {
 	API client.KeysAPI
 }
 
-// NewAPIClient creates new api client
-func NewAPIClient(api client.KeysAPI) *APIClient {
-	return &APIClient{
+// NewClient creates new api client
+func NewClient(api client.KeysAPI) *Client {
+	return &Client{
 		API: api,
 	}
 }
 
 // CreateOrSet create new key/value pair or set existing key
-func (c *APIClient) CreateOrSet(key string, value string) error {
+func (c *Client) CreateOrSet(key string, value string) error {
 	_, err := c.API.Create(context.Background(), key, value)
 	if err != nil {
 		// Set key "/foo" to value "bar".
@@ -33,7 +33,7 @@ func (c *APIClient) CreateOrSet(key string, value string) error {
 }
 
 // Get gets value with key
-func (c *APIClient) Get(key string) (string, error) {
+func (c *Client) Get(key string) (string, error) {
 	resp, err := c.API.Get(context.Background(), key, nil)
 	if err != nil {
 		return "", err

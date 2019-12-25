@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"log"
 
-	"go.etcd.io/etcd/client"
 	"github.com/clicktherapeutics/ct-dns/pkg/etcd"
+	dHttp "github.com/clicktherapeutics/ct-dns/pkg/http"
+	"github.com/gorilla/mux"
+	"go.etcd.io/etcd/client"
+	"net/http"
 )
 
 func main() {
@@ -19,18 +22,24 @@ func main() {
 		fmt.Println("Cannot initialize the etcd client")
 	}
 
-	etcdCli := etcd.NewAPIClient(client.NewKeysAPI(c))
-
-	// Set key "/foo" to value "bar".
-	err = etcdCli.CreateOrSet("/foo", "bar2")
-	if err != nil {
+	etcdCli := etcd.NewClient(client.NewKeysAPI(c))
+	r := mux.NewRouter()
+	httpHandler := dHttp.NewHandler(etcdCli)
+	httpHandler.RegisterRoutes(r)
+	if err = http.ListenAndServe("0.0.0.0:8080", r); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("successfully create/set key %q with value %q", "/foo", "bar")
 
-	val, err := etcdCli.Get("/foo")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("key has %q value\n", val)
+	// // Set key "/foo" to value "bar".
+	// err = etcdCli.CreateOrSet("dummy-service", "[192.0.0.1]")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Printf("successfully create/set key %q with value %q", "dummy-service", "[192.0.0.1]")
+
+	// val, err := etcdCli.Get("dummy-service")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Printf("key has %q value\n", val)
 }
