@@ -13,11 +13,11 @@ import (
 
 // Handler use etcd client to query
 type Handler struct {
-	Client *etcd.Client
+	Client etcd.ETCDClient
 }
 
 // NewHandler creates a new Handler
-func NewHandler(client *etcd.Client) *Handler {
+func NewHandler(client etcd.ETCDClient) *Handler {
 	return &Handler{
 		Client: client,
 	}
@@ -49,7 +49,7 @@ func (aH *Handler) GetService(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(hosts)
 	default:
-		http.Error(w, "Unsupported Request Operation", http.StatusInternalServerError)
+		http.Error(w, "Unsupported Request Operation", http.StatusServiceUnavailable)
 	}
 }
 
@@ -120,7 +120,7 @@ func (aH *Handler) PostService(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 	default:
-		http.Error(w, "Unsupported Request Operation", http.StatusInternalServerError)
+		http.Error(w, "Unsupported Request Operation", http.StatusServiceUnavailable)
 	}
 }
 
