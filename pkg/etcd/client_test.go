@@ -5,7 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/clicktherapeutics/ct-dns/pkg/etcd"
 	"github.com/clicktherapeutics/ct-dns/pkg/etcd/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -21,7 +20,7 @@ func Test_SetKeyValueNonError(t *testing.T) {
 			Value: "[192.0.0.1, 192.0.0.2]",
 		},
 	}, nil)
-	client := etcd.NewClient(api)
+	client := NewClient(api)
 	err := client.CreateOrSet("dummy-service", "[192.0.0.1, 192.0.0.2]")
 	assert.NoError(t, err)
 }
@@ -35,7 +34,7 @@ func Test_SetExistingKeyNoError(t *testing.T) {
 			Value: "[192.0.0.1]",
 		},
 	}, nil)
-	client := etcd.NewClient(api)
+	client := NewClient(api)
 	err := client.CreateOrSet("dummy-service", "[192.0.0.1]")
 	assert.NoError(t, err)
 }
@@ -47,7 +46,7 @@ func Test_Get(t *testing.T) {
 			Value: "[192.0.0.1]",
 		},
 	}, nil)
-	client := etcd.NewClient(api)
+	client := NewClient(api)
 	res, err := client.Get("dummy-service")
 	assert.NoError(t, err)
 	assert.Equal(t, "[192.0.0.1]", res)

@@ -99,6 +99,8 @@ func (aH *Handler) PostService(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				return
 			}
+			http.Error(w, "Failed to add Host: Host already existed", http.StatusInternalServerError)
+			return
 		} else if b.Operation == "delete" {
 			include, i := contains(hosts, b.Host)
 			if include {
@@ -116,8 +118,8 @@ func (aH *Handler) PostService(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				return
 			}
+			http.Error(w, "Failed to delete Host: Host not found", http.StatusInternalServerError)
 		}
-
 		w.Header().Set("Content-Type", "application/json")
 	default:
 		http.Error(w, "Unsupported Request Operation", http.StatusServiceUnavailable)

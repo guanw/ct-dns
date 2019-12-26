@@ -23,7 +23,7 @@ func main() {
 	}
 
 	etcdCli := etcd.NewClient(client.NewKeysAPI(c))
-	
+
 	r := mux.NewRouter()
 	httpHandler := dHttp.NewHandler(etcdCli)
 	httpHandler.RegisterRoutes(r)
