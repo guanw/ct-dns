@@ -1,0 +1,23 @@
+syntax = "proto3";
+service Dns {
+  rpc GetService (GetRequest) returns (GetResponse) {}
+  rpc PostService (PostRequest) returns (PostResponse) {}
+}
+
+message GetRequest {
+ string serviceName = 1;
+}
+
+message GetResponse {
+  string hosts = 1;
+}
+
+message PostRequest {
+  string serviceName = 1;
+  string operation = 2;
+  string host = 3;
+}
+
+message PostResponse {
+  string message = 1;
+}

@@ -8,6 +8,8 @@ BINARY_NAME=ct_dns_binary
 BINARY_UNIX=$(BINARY_NAME)_unix
 
 all: test build
+fmt:
+	go fmt ./...
 build:
 	$(GOBUILD) -o $(BINARY_NAME) -v
 test:
@@ -16,6 +18,8 @@ clean:
 	$(GOCLEAN)
 	rm -f $(BINARY_NAME)
 	rm -f $(BINARY_UNIX)
+protoc:
+	cd IDL/proto && protoc -I . dns.proto --go_out=plugins=grpc:.
 # run:
 # 	$(GOBUILD) -o $(BINARY_NAME) -v ./...
 # 	./$(BINARY_NAME)
