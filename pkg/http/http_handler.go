@@ -2,24 +2,23 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
-	"github.com/clicktherapeutics/ct-dns/pkg/etcd"
+	"github.com/clicktherapeutics/ct-dns/pkg/store"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 )
 
 // Handler use etcd client to query
 type Handler struct {
-	Client etcd.ETCDClient
+	Store store.Store
 }
 
 // NewHandler creates a new Handler
-func NewHandler(client etcd.ETCDClient) *Handler {
+func NewHandler(store store.Store) *Handler {
 	return &Handler{
-		Client: client,
+		Store: store,
 	}
 }
 
@@ -35,15 +34,10 @@ func (aH *Handler) GetService(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		vars := mux.Vars(r)
 		serviceName := vars["serviceName"]
-		res, err := aH.Client.Get(serviceName)
+		hosts, err := aH.Store.GetService(serviceName)
 		w.Header().Set("Content-Type", "application/json")
 		if err != nil {
-			http.Error(w, errors.Wrap(err, "Service Name not found").Error(), http.StatusInternalServerError)
-			return
-		}
-		hosts, err := unmarshalStrToHosts(res)
-		if err != nil {
-			http.Error(w, errors.Wrap(err, "UnmarshalStrToHosts failed").Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -63,62 +57,10 @@ func (aH *Handler) PostService(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		res, err := aH.Client.Get(b.ServiceName)
+		err = aH.Store.UpdateService(b.ServiceName, b.Operation, b.Host)
 		if err != nil {
-			if b.Operation == "add" {
-				err := aH.Client.CreateOrSet(b.ServiceName, fmt.Sprintf(`["%s"]`, b.Host))
-				if err != nil {
-					http.Error(w, errors.Wrap(err, "Failed to create new service entry").Error(), http.StatusInternalServerError)
-					return
-				}
-				w.WriteHeader(http.StatusOK)
-				return
-			}
-			http.Error(w, errors.Wrap(err, "Failed to delete service: Service name not found").Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
-		}
-		hosts, err := unmarshalStrToHosts(res)
-		if err != nil {
-			http.Error(w, errors.Wrap(err, "UnmarshalStrToHosts failed").Error(), http.StatusInternalServerError)
-			return
-		}
-		if b.Operation == "add" {
-			include, _ := contains(hosts, b.Host)
-			if !include {
-				hosts = append(hosts, b.Host)
-				string, err := marshalHostsToStr(hosts)
-				if err != nil {
-					http.Error(w, errors.Wrap(err, "Failed to marshal hosts to string").Error(), http.StatusInternalServerError)
-					return
-				}
-				err = aH.Client.CreateOrSet(b.ServiceName, string)
-				if err != nil {
-					http.Error(w, errors.Wrap(err, "Failed to add host").Error(), http.StatusInternalServerError)
-					return
-				}
-				w.WriteHeader(http.StatusOK)
-				return
-			}
-			http.Error(w, "Failed to add Host: Host already existed", http.StatusInternalServerError)
-			return
-		} else if b.Operation == "delete" {
-			include, i := contains(hosts, b.Host)
-			if include {
-				hosts = append(hosts[:i], hosts[i+1:]...)
-				string, err := marshalHostsToStr(hosts)
-				if err != nil {
-					http.Error(w, errors.Wrap(err, "Failed to marshal hosts to string").Error(), http.StatusInternalServerError)
-					return
-				}
-				err = aH.Client.CreateOrSet(b.ServiceName, string)
-				if err != nil {
-					http.Error(w, errors.Wrap(err, "Failed to delete host").Error(), http.StatusInternalServerError)
-					return
-				}
-				w.WriteHeader(http.StatusOK)
-				return
-			}
-			http.Error(w, "Failed to delete Host: Host not found", http.StatusInternalServerError)
 		}
 		w.Header().Set("Content-Type", "application/json")
 	default:
@@ -140,26 +82,4 @@ func decodeBody(in io.Reader) (postBody, error) {
 		return postBody{}, err
 	}
 	return b, nil
-}
-
-func contains(s []string, e string) (bool, int) {
-	for i, a := range s {
-		if a == e {
-			return true, i
-		}
-	}
-	return false, -1
-}
-
-func unmarshalStrToHosts(input string) ([]string, error) {
-	var hosts []string
-	if err := json.Unmarshal([]byte(input), &hosts); err != nil {
-		return nil, err
-	}
-	return hosts, nil
-}
-
-func marshalHostsToStr(input []string) (string, error) {
-	res, err := json.Marshal(input)
-	return string(res), err
 }

@@ -4,22 +4,42 @@ import (
 	"context"
 
 	pb "github.com/clicktherapeutics/ct-dns/pkg/grpc/proto-gen"
+	"github.com/clicktherapeutics/ct-dns/pkg/store"
 )
 
 // DNSServer implements pb.DnsServer
-type DNSServer struct{}
+type DNSServer struct {
+	Store store.Store
+}
 
 // NewServer creates new DnsServer
-func NewServer() pb.DnsServer {
-	return &DNSServer{}
+func NewServer(store store.Store) pb.DnsServer {
+	return &DNSServer{
+		Store: store,
+	}
 }
 
 // GetService implements DnsServer.GetService
 func (s *DNSServer) GetService(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, error) {
-	return &pb.GetResponse{}, nil
+	serviceName := req.GetServiceName()
+	hosts, err := s.Store.GetService(serviceName)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetResponse{
+		Hosts: hosts,
+	}, nil
 }
 
 // PostService implements DnsServer.PostService
 func (s *DNSServer) PostService(ctx context.Context, req *pb.PostRequest) (*pb.PostResponse, error) {
+	err := s.Store.UpdateService(
+		req.GetServiceName(),
+		req.GetOperation(),
+		req.GetHost(),
+	)
+	if err != nil {
+		return nil, err
+	}
 	return &pb.PostResponse{}, nil
 }

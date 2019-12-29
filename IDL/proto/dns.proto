@@ -9,7 +9,7 @@ message GetRequest {
 }
 
 message GetResponse {
-  string hosts = 1;
+  repeated string hosts = 1;
 }
 
 message PostRequest {
@@ -19,5 +19,4 @@ message PostRequest {
 }
 
 message PostResponse {
-  string message = 1;
 }
