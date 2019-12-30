@@ -23,12 +23,9 @@ func NewServer(store store.Store) pb.DnsServer {
 func (s *DNSServer) GetService(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, error) {
 	serviceName := req.GetServiceName()
 	hosts, err := s.Store.GetService(serviceName)
-	if err != nil {
-		return nil, err
-	}
 	return &pb.GetResponse{
 		Hosts: hosts,
-	}, nil
+	}, err
 }
 
 // PostService implements DnsServer.PostService
@@ -38,8 +35,5 @@ func (s *DNSServer) PostService(ctx context.Context, req *pb.PostRequest) (*pb.P
 		req.GetOperation(),
 		req.GetHost(),
 	)
-	if err != nil {
-		return nil, err
-	}
-	return &pb.PostResponse{}, nil
+	return &pb.PostResponse{}, err
 }
