@@ -20,6 +20,15 @@ clean:
 	rm -f $(BINARY_UNIX)
 protoc:
 	cd IDL/proto && protoc -I . dns.proto --go_out=plugins=grpc:.
+
+etcd-single-node:
+	cd etcd && chmod +x etcd.sh && ./etcd.sh
+
+etcd-kube:
+	cd etcd && kubectl apply -f etcd-sts.yaml
+	minikube tunnel &
+	kubectl get all -n default | grep etcd-client
+
 # run:
 # 	$(GOBUILD) -o $(BINARY_NAME) -v ./...
 # 	./$(BINARY_NAME)

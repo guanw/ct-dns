@@ -1,5 +1,7 @@
 httpport: 8080
 grpcport: 50051
 etcd:
-  - host: 127.0.0.1
-    port: 5001
+  # - host: 127.0.0.1
+  #   port: 5001
+  - host: 10.110.251.205
+    port: 2379
