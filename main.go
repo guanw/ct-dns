@@ -17,6 +17,8 @@ import (
 	"github.com/pkg/errors"
 	"go.etcd.io/etcd/client"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 func main() {
@@ -44,6 +46,9 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer()
+	healthServer := health.NewServer()
+	healthServer.SetServingStatus("ct-dns", grpc_health_v1.HealthCheckResponse_SERVING)
+	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
 	pb.RegisterDnsServer(grpcServer, dnsServer)
 	go grpcServer.Serve(lis)
 	defer grpcServer.Stop()

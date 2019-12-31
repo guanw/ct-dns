@@ -63,7 +63,7 @@ func initializeTestServer(store *mocks.Store) *httptest.Server {
 	return httptest.NewServer(r)
 }
 
-func makePostReq(t *testing.T, body interface{}, server *httptest.Server) (io.ReadCloser, int) {
+func makePostServiceReq(t *testing.T, body interface{}, server *httptest.Server) (io.ReadCloser, int) {
 	jsonBody, _ := json.Marshal(body)
 	req, err := http.NewRequest(http.MethodPost, server.URL+"/api/service", bytes.NewBuffer(jsonBody))
 	assert.NoError(t, err)
@@ -72,12 +72,24 @@ func makePostReq(t *testing.T, body interface{}, server *httptest.Server) (io.Re
 	return res.Body, res.StatusCode
 }
 
-func makeGetReq(t *testing.T, server *httptest.Server, serviceName string) (io.ReadCloser, int) {
+func makeGetServiceReq(t *testing.T, server *httptest.Server, serviceName string) (io.ReadCloser, int) {
 	req, err := http.NewRequest(http.MethodGet, server.URL+"/api/service/"+serviceName, bytes.NewBuffer([]byte{}))
 	assert.NoError(t, err)
 	res, err := httpClient.Do(req)
 	assert.NoError(t, err)
 	return res.Body, res.StatusCode
+}
+
+func Test_Healthcheck(t *testing.T) {
+	server := initializeTestServer(&mocks.Store{})
+	defer server.Close()
+
+	req, err := http.NewRequest(http.MethodGet, server.URL+"/api/health", bytes.NewBuffer([]byte{}))
+	assert.NoError(t, err)
+	res, err := httpClient.Do(req)
+	assert.NoError(t, err)
+	assert.Equal(t, 200, res.StatusCode)
+	res.Body.Close()
 }
 
 func Test_GetRequest(t *testing.T) {
@@ -87,11 +99,11 @@ func Test_GetRequest(t *testing.T) {
 	server := initializeTestServer(mockClient)
 	defer server.Close()
 
-	getRes, statusCode := makeGetReq(t, server, "valid-service")
+	getRes, statusCode := makeGetServiceReq(t, server, "valid-service")
 	defer getRes.Close()
 	assert.Equal(t, 200, statusCode)
 
-	getRes, statusCode = makeGetReq(t, server, "error-service")
+	getRes, statusCode = makeGetServiceReq(t, server, "error-service")
 	defer getRes.Close()
 	res, err := ioutil.ReadAll(getRes)
 	assert.NoError(t, err)
@@ -106,7 +118,7 @@ func Test_PostRequest(t *testing.T) {
 	server := initializeTestServer(mockClient)
 	defer server.Close()
 
-	postRes, statusCode := makePostReq(t, postBody{
+	postRes, statusCode := makePostServiceReq(t, postBody{
 		ServiceName: "valid-service",
 		Operation:   "add",
 		Host:        "192.0.0.1",
@@ -114,13 +126,13 @@ func Test_PostRequest(t *testing.T) {
 	defer postRes.Close()
 	assert.Equal(t, 200, statusCode)
 
-	postRes, statusCode = makePostReq(t, postBody{
+	postRes, statusCode = makePostServiceReq(t, postBody{
 		ServiceName: "error-service",
 	}, server)
 	defer postRes.Close()
 	assert.Equal(t, 500, statusCode)
 
-	postRes, statusCode = makePostReq(t, "", server)
+	postRes, statusCode = makePostServiceReq(t, "", server)
 	defer postRes.Close()
 	res, err := ioutil.ReadAll(postRes)
 	assert.NoError(t, err)

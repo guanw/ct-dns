@@ -26,9 +26,16 @@ func NewHandler(store store.Store) *Handler {
 func (aH *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/api/service/{serviceName}", aH.GetService).Methods(http.MethodGet)
 	router.HandleFunc("/api/service", aH.PostService).Methods(http.MethodPost)
+	router.HandleFunc("/api/health", aH.HealthService).Methods(http.MethodGet)
 }
 
-// GetService process GET request
+// HealthService process healthcheck GET request
+func (aH *Handler) HealthService(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	return
+}
+
+// GetService process GET service request
 func (aH *Handler) GetService(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
@@ -47,7 +54,7 @@ func (aH *Handler) GetService(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// PostService process POST request
+// PostService process POST service request
 func (aH *Handler) PostService(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
