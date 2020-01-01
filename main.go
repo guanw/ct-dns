@@ -7,15 +7,16 @@ import (
 
 	"net/http"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	config "github.com/clicktherapeutics/ct-dns/cmd"
-	"github.com/clicktherapeutics/ct-dns/pkg/etcd"
 	dns "github.com/clicktherapeutics/ct-dns/pkg/grpc"
 	pb "github.com/clicktherapeutics/ct-dns/pkg/grpc/proto-gen"
 	ctHttp "github.com/clicktherapeutics/ct-dns/pkg/http"
+	ctdynamodb "github.com/clicktherapeutics/ct-dns/pkg/storage/dynamodb"
 	"github.com/clicktherapeutics/ct-dns/pkg/store"
 	"github.com/gorilla/mux"
-	"github.com/pkg/errors"
-	"go.etcd.io/etcd/client"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -27,18 +28,26 @@ func main() {
 	for _, v := range cfg.Etcd {
 		endpoints = append(endpoints, "http://"+v.Host+":"+v.Port)
 	}
-	etcdCfg := client.Config{
-		Endpoints: endpoints,
-	}
+	// etcdCfg := client.Config{
+	// 	Endpoints: endpoints,
+	// }
 
-	c, err := client.New(etcdCfg)
-	if err != nil {
-		// handle error
-		log.Fatalf(errors.Wrap(err, "Cannot initialize the etcd client").Error())
-	}
+	// c, err := client.New(etcdCfg)
+	// if err != nil {
+	// 	// handle error
+	// 	log.Fatalf(errors.Wrap(err, "Cannot initialize the etcd client").Error())
+	// }
 
-	etcdCli := etcd.NewClient(client.NewKeysAPI(c))
-	store := store.NewStore(etcdCli)
+	// etcdCli := etcd.NewClient(client.NewKeysAPI(c))
+	// store := store.NewStore(etcdCli)
+
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region:   aws.String("us-east-1"),
+		Endpoint: aws.String("http://localhost:8000"),
+	}))
+	db := dynamodb.New(sess)
+
+	store := store.NewStore(ctdynamodb.NewClient(db))
 
 	dnsServer := dns.NewServer(store)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.GRPCPort))
