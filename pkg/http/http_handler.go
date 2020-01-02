@@ -44,13 +44,13 @@ func (aH *Handler) GetService(w http.ResponseWriter, r *http.Request) {
 		hosts, err := aH.Store.GetService(serviceName)
 		w.Header().Set("Content-Type", "application/json")
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(hosts)
 	default:
-		http.Error(w, "Unsupported Request Operation", http.StatusServiceUnavailable)
+		http.Error(w, "Unsupported Request Operation", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -60,18 +60,15 @@ func (aH *Handler) PostService(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		b, err := decodeBody(r.Body)
 		if err != nil {
-			http.Error(w, errors.Wrap(err, "Failed to decode the Post request body").Error(), http.StatusInternalServerError)
+			http.Error(w, errors.Wrap(err, "Failed to decode the Post request body").Error(), http.StatusUnprocessableEntity)
 			return
 		}
 
-		err = aH.Store.UpdateService(b.ServiceName, b.Operation, b.Host)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		_ = aH.Store.UpdateService(b.ServiceName, b.Operation, b.Host)
+		// TODO think of way to log logic error and not panic
 		w.Header().Set("Content-Type", "application/json")
 	default:
-		http.Error(w, "Unsupported Request Operation", http.StatusServiceUnavailable)
+		http.Error(w, "Unsupported Request Operation", http.StatusMethodNotAllowed)
 	}
 }
 

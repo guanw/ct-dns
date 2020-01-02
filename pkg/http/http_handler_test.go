@@ -108,7 +108,7 @@ func Test_GetRequest(t *testing.T) {
 	res, err := ioutil.ReadAll(getRes)
 	assert.NoError(t, err)
 	assert.True(t, strings.Contains(string(res), "new error"))
-	assert.Equal(t, 500, statusCode)
+	assert.Equal(t, 404, statusCode)
 }
 
 func Test_PostRequest(t *testing.T) {
@@ -130,12 +130,12 @@ func Test_PostRequest(t *testing.T) {
 		ServiceName: "error-service",
 	}, server)
 	defer postRes.Close()
-	assert.Equal(t, 500, statusCode)
+	assert.Equal(t, 200, statusCode)
 
 	postRes, statusCode = makePostServiceReq(t, "", server)
 	defer postRes.Close()
 	res, err := ioutil.ReadAll(postRes)
 	assert.NoError(t, err)
 	assert.True(t, strings.Contains(string(res), "Failed to decode the Post request body"))
-	assert.Equal(t, 500, statusCode)
+	assert.Equal(t, 422, statusCode)
 }
