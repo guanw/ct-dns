@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"context"
+	"sync"
 
 	"go.etcd.io/etcd/client"
 )
@@ -14,7 +15,8 @@ type ETCDClient interface {
 
 // Client defineds api client for set/get operations
 type Client struct {
-	API client.KeysAPI
+	API  client.KeysAPI
+	lock sync.Mutex
 }
 
 // NewClient creates new api client
@@ -26,6 +28,8 @@ func NewClient(api client.KeysAPI) ETCDClient {
 
 // CreateOrSet create new key/value pair or set existing key
 func (c *Client) CreateOrSet(key, value string) error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	_, err := c.API.Create(context.Background(), key, value)
 	if err != nil {
 		// Set key "/foo" to value "bar".
@@ -40,7 +44,9 @@ func (c *Client) CreateOrSet(key, value string) error {
 
 // Get gets value with key
 func (c *Client) Get(key string) (string, error) {
+	c.lock.Lock()
 	resp, err := c.API.Get(context.Background(), key, nil)
+	c.lock.Unlock()
 	if err != nil {
 		return "", err
 	}
