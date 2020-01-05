@@ -2,7 +2,6 @@ package store
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/clicktherapeutics/ct-dns/pkg/etcd"
 	"github.com/pkg/errors"
@@ -36,53 +35,13 @@ func (s *store) GetService(serviceName string) ([]string, error) {
 }
 
 func (s *store) UpdateService(serviceName, operation, host string) error {
-	res, err := s.Client.Get(serviceName)
-	if err != nil {
-		if operation == "add" {
-			err := s.Client.CreateOrSet(serviceName, fmt.Sprintf(`["%s"]`, host))
-			if err != nil {
-				return errors.Wrap(err, "Failed to create new service entry")
-			}
-			return nil
-		}
-		return errors.Wrap(err, "Failed to delete service: Service name not found")
-	}
-	hosts, err := unmarshalStrToHosts(res)
-	if err != nil {
-		return errors.Wrap(err, "UnmarshalStrToHosts failed")
-	}
+	var err error
 	if operation == "add" {
-		include, _ := contains(hosts, host)
-		if !include {
-			hosts = append(hosts, host)
-			str, err := marshalHostsToStr(hosts)
-			if err != nil {
-				return errors.Wrap(err, "Failed to marshal hosts to string")
-			}
-			err = s.Client.CreateOrSet(serviceName, str)
-			if err != nil {
-				return errors.Wrap(err, "Failed to add host")
-			}
-			return nil
-		}
-		return errors.New("Failed to add Host: Host already existed")
+		err = s.Client.Create(serviceName, host)
 	} else if operation == "delete" {
-		include, i := contains(hosts, host)
-		if include {
-			hosts = append(hosts[:i], hosts[i+1:]...)
-			str, err := marshalHostsToStr(hosts)
-			if err != nil {
-				return errors.Wrap(err, "Failed to marshal hosts to string")
-			}
-			err = s.Client.CreateOrSet(serviceName, str)
-			if err != nil {
-				return errors.Wrap(err, "Failed to delete host")
-			}
-			return nil
-		}
-		return errors.New("Failed to delete Host: Host not found")
+		err = s.Client.Delete(serviceName, host)
 	}
-	return nil
+	return err
 }
 
 func unmarshalStrToHosts(input string) ([]string, error) {
@@ -93,16 +52,7 @@ func unmarshalStrToHosts(input string) ([]string, error) {
 	return hosts, nil
 }
 
-func marshalHostsToStr(input []string) (string, error) {
-	res, err := json.Marshal(input)
-	return string(res), err
-}
-
-func contains(s []string, e string) (bool, int) {
-	for i, a := range s {
-		if a == e {
-			return true, i
-		}
-	}
-	return false, -1
-}
+// func marshalHostsToStr(input []string) (string, error) {
+// 	res, err := json.Marshal(input)
+// 	return string(res), err
+// }
