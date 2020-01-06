@@ -6,15 +6,9 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/clicktherapeutics/ct-dns/pkg/storage"
 	"go.etcd.io/etcd/client"
 )
-
-// ETCDClient defines interface for set/get operation
-type ETCDClient interface {
-	Create(key, value string) error
-	Get(key string) (string, error)
-	Delete(key string, value string) error
-}
 
 // Client defineds api client for set/get operations
 type Client struct {
@@ -23,7 +17,7 @@ type Client struct {
 }
 
 // NewClient creates new api client
-func NewClient(api client.KeysAPI) ETCDClient {
+func NewClient(api client.KeysAPI) storage.Client {
 	return &Client{
 		API: api,
 	}
@@ -58,7 +52,7 @@ func (c *Client) Get(key string) (string, error) {
 }
 
 // Delete delete key recursively
-func (c *Client) Delete(key string, value string) error {
+func (c *Client) Delete(key, value string) error {
 	c.lock.Lock()
 	_, err := c.API.Delete(context.Background(), "/"+key+"/"+value, &client.DeleteOptions{
 		Recursive: true,

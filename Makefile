@@ -29,6 +29,9 @@ etcd-kube:
 	minikube tunnel &
 	kubectl get all -n default | grep etcd-client
 	echo "replace config/development.yaml host with the public ip above"
+
+dynamodb-single-cluster:
+	docker run -d -it -p 8000:8000 dwmkerr/dynamodb -sharedDb
 # run:
 # 	$(GOBUILD) -o $(BINARY_NAME) -v ./...
 # 	./$(BINARY_NAME)

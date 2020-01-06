@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/clicktherapeutics/ct-dns/pkg/etcd/mocks"
+	"github.com/clicktherapeutics/ct-dns/pkg/storage/etcd/mocks"
 	"github.com/stretchr/testify/assert"
 	client "go.etcd.io/etcd/client"
 )

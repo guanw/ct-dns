@@ -3,7 +3,7 @@ package store
 import (
 	"encoding/json"
 
-	"github.com/clicktherapeutics/ct-dns/pkg/etcd"
+	"github.com/clicktherapeutics/ct-dns/pkg/storage"
 	"github.com/pkg/errors"
 )
 
@@ -13,10 +13,10 @@ type Store interface {
 }
 
 type store struct {
-	Client etcd.ETCDClient
+	Client storage.Client
 }
 
-func NewStore(client etcd.ETCDClient) *store {
+func NewStore(client storage.Client) *store {
 	return &store{
 		Client: client,
 	}
