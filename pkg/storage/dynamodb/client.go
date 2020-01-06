@@ -2,6 +2,7 @@ package dynamodb
 
 import (
 	"encoding/json"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -12,7 +13,8 @@ import (
 
 // Client defines api client for set/get operations
 type Client struct {
-	DB DynamodbClient
+	DB   DynamodbClient
+	lock sync.Mutex
 }
 
 // DynamodbClient defines the interface for dynamodb client
@@ -50,10 +52,12 @@ func (c *Client) Create(key, value string) error {
 	if err != nil {
 		return errors.Wrap(err, "Failed to marshal serviceToHost map")
 	}
+	c.lock.Lock()
 	_, err = c.DB.PutItem(&dynamodb.PutItemInput{
 		TableName: aws.String("service-discovery"),
 		Item:      sMap,
 	})
+	c.lock.Unlock()
 	if err != nil {
 		return errors.Wrap(err, "Failed to create/set serviceToHost map")
 	}
@@ -73,7 +77,9 @@ func (c *Client) Get(key string) (string, error) {
 		TableName: aws.String("service-discovery"),
 	}
 
+	c.lock.Lock()
 	resp, err := c.DB.Query(params)
+	c.lock.Unlock()
 	if err != nil {
 		return "", errors.Wrap(err, "Failed to get hosts corresponding to the service")
 	}
@@ -100,10 +106,12 @@ func (c *Client) Delete(key, value string) error {
 	if err != nil {
 		return errors.Wrap(err, "Failed to marshal serviceToHost map")
 	}
+	c.lock.Lock()
 	_, err = c.DB.DeleteItem(&dynamodb.DeleteItemInput{
 		TableName: aws.String("service-discovery"),
 		Key:       sMap,
 	})
+	c.lock.Unlock()
 	if err != nil {
 		return errors.Wrap(err, "Failed to delete service and host")
 	}
