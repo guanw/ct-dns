@@ -10,7 +10,7 @@ import (
 	"go.etcd.io/etcd/client"
 )
 
-// Client defineds api client for set/get operations
+// Client defines api client for set/get operations
 type Client struct {
 	API  client.KeysAPI
 	lock sync.Mutex
@@ -23,7 +23,7 @@ func NewClient(api client.KeysAPI) storage.Client {
 	}
 }
 
-// Create sets new key/value pair or set existing key
+// Create sets new /key/value directory
 func (c *Client) Create(key, value string) error {
 	c.lock.Lock()
 	_, err := c.API.Set(context.Background(), "/"+key+"/"+value, "", &client.SetOptions{
@@ -33,7 +33,7 @@ func (c *Client) Create(key, value string) error {
 	return err
 }
 
-// Get gets value with key
+// Get gets values under /key directory
 func (c *Client) Get(key string) (string, error) {
 	c.lock.Lock()
 	resp, err := c.API.Get(context.Background(), "/"+key, &client.GetOptions{

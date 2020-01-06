@@ -42,7 +42,7 @@ type keyValuePair struct {
 	Host    string `dynamodbav: "Host"`
 }
 
-// CreateOrSet create new key/value pair or set existing key
+// Create create new entry with key as primary key and value as secondary partition key
 func (c *Client) Create(key, value string) error {
 	s := keyValuePair{
 		Service: key,
@@ -64,7 +64,7 @@ func (c *Client) Create(key, value string) error {
 	return nil
 }
 
-// Get gets value with key
+// Get gets hosts under primary key
 func (c *Client) Get(key string) (string, error) {
 
 	params := &dynamodb.QueryInput{
@@ -96,7 +96,7 @@ func (c *Client) Get(key string) (string, error) {
 	return string(json), nil
 }
 
-// Delete deletes service & host combination
+// Delete deletes records with key as primary key and value as secondary key
 func (c *Client) Delete(key, value string) error {
 	s := keyValuePair{
 		Service: key,
