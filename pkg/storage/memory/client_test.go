@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,6 +17,7 @@ func Test_InsertNewKey(t *testing.T) {
 	m.Create("dummy-service", "192.0.0.2")
 	res, err = m.Get("dummy-service")
 	assert.NoError(t, err)
+	fmt.Println("haha");
 	assert.True(t, `["192.0.0.1","192.0.0.2"]` == res || `["192.0.0.2","192.0.0.1"]` == res)
 }
 func Test_InsertExistingKeys(t *testing.T) {
