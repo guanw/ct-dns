@@ -51,8 +51,3 @@ func unmarshalStrToHosts(input string) ([]string, error) {
 	}
 	return hosts, nil
 }
-
-// func marshalHostsToStr(input []string) (string, error) {
-// 	res, err := json.Marshal(input)
-// 	return string(res), err
-// }
