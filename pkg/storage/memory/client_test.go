@@ -16,7 +16,7 @@ func Test_InsertNewKey(t *testing.T) {
 	m.Create("dummy-service", "192.0.0.2")
 	res, err = m.Get("dummy-service")
 	assert.NoError(t, err)
-	assert.Equal(t, `["192.0.0.1","192.0.0.2"]`, res)
+	assert.True(t, `["192.0.0.1","192.0.0.2"]` == res || `["192.0.0.2","192.0.0.1"]` == res)
 }
 func Test_InsertExistingKeys(t *testing.T) {
 	m := NewClient()

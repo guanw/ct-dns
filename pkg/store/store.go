@@ -3,7 +3,7 @@ package store
 import (
 	"encoding/json"
 
-	"github.com/clicktherapeutics/ct-dns/pkg/storage"
+	"github.com/guanw/ct-dns/pkg/storage"
 	"github.com/pkg/errors"
 )
 

@@ -10,6 +10,9 @@ BINARY_UNIX=$(BINARY_NAME)_unix
 all: test build
 fmt:
 	go fmt ./...
+install:
+	@which dep > /dev/null || curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+	dep ensure -vendor-only
 build:
 	$(GOBUILD) -o $(BINARY_NAME) -v
 test:
@@ -41,4 +44,4 @@ dynamodb-single-cluster:
 build-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_UNIX) -v
 docker-build:
-	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/github.com/clicktherapeutics/ct-dns golang:latest go build -o "$(BINARY_UNIX)" -v
+	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/github.com/guanw/ct-dns golang:latest go build -o "$(BINARY_UNIX)" -v

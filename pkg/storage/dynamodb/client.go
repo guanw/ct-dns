@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"github.com/clicktherapeutics/ct-dns/pkg/storage"
+	"github.com/guanw/ct-dns/pkg/storage"
 	"github.com/pkg/errors"
 )
 

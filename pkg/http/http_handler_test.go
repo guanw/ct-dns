@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/clicktherapeutics/ct-dns/pkg/store/mocks"
 	"github.com/gorilla/mux"
+	"github.com/guanw/ct-dns/pkg/store/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
