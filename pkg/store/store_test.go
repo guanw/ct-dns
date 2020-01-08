@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/clicktherapeutics/ct-dns/pkg/storage/mocks"
+	"github.com/guanw/ct-dns/pkg/storage/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

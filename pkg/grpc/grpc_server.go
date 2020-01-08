@@ -3,8 +3,8 @@ package grpc
 import (
 	"context"
 
-	pb "github.com/clicktherapeutics/ct-dns/pkg/grpc/proto-gen"
-	"github.com/clicktherapeutics/ct-dns/pkg/store"
+	pb "github.com/guanw/ct-dns/pkg/grpc/proto-gen"
+	"github.com/guanw/ct-dns/pkg/store"
 )
 
 // DNSServer implements pb.DnsServer

@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	pb "github.com/clicktherapeutics/ct-dns/pkg/grpc/proto-gen"
-	"github.com/clicktherapeutics/ct-dns/pkg/store"
-	"github.com/clicktherapeutics/ct-dns/pkg/store/mocks"
+	pb "github.com/guanw/ct-dns/pkg/grpc/proto-gen"
+	"github.com/guanw/ct-dns/pkg/store"
+	"github.com/guanw/ct-dns/pkg/store/mocks"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/test/bufconn"

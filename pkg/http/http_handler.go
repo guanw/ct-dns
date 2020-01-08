@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/clicktherapeutics/ct-dns/pkg/store"
+	"github.com/guanw/ct-dns/pkg/store"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 )
