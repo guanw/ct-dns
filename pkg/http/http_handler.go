@@ -5,8 +5,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/guanw/ct-dns/pkg/store"
 	"github.com/gorilla/mux"
+	"github.com/guanw/ct-dns/pkg/store"
 	"github.com/pkg/errors"
 )
 
