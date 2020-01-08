@@ -4,12 +4,12 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/clicktherapeutics/ct-dns/pkg/etcd/mocks"
+	"github.com/clicktherapeutics/ct-dns/pkg/storage/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_GetService(t *testing.T) {
-	mockClient := &mocks.ETCDClient{}
+	mockClient := &mocks.Client{}
 	mockClient.On("Get", "dummy-service").Return(`["192.0.0.1"]`, nil)
 	mockClient.On("Get", "non-exist-service").Return("", nil)
 	mockClient.On("Get", "error-service").Return("", errors.New("not found"))
@@ -47,7 +47,7 @@ func Test_GetService(t *testing.T) {
 }
 
 func Test_ServiceAddNewHost(t *testing.T) {
-	mockClient := &mocks.ETCDClient{}
+	mockClient := &mocks.Client{}
 	mockClient.On("Create", "dummy-service", "192.0.0.1").Return(nil)
 	store := NewStore(mockClient)
 
@@ -56,7 +56,7 @@ func Test_ServiceAddNewHost(t *testing.T) {
 }
 
 func Test_ServiceDeleteHost(t *testing.T) {
-	mockClient := &mocks.ETCDClient{}
+	mockClient := &mocks.Client{}
 	mockClient.On("Delete", "dummy-service", "192.0.0.1").Return(nil)
 	store := NewStore(mockClient)
 
@@ -95,32 +95,3 @@ func Test_unmarshalStrToHosts(t *testing.T) {
 		})
 	}
 }
-
-// func Test_marshalHostsToStr(t *testing.T) {
-// 	tests := []struct {
-// 		input       []string
-// 		expectedErr bool
-// 		description string
-// 		expected    string
-// 	}{
-// 		{
-// 			input:       []string{"192.0.0.1", "192.0.0.2"},
-// 			expectedErr: false,
-// 			expected:    `["192.0.0.1","192.0.0.2"]`,
-// 			description: "input: [192.0.0.1, 192.0.0.2]",
-// 		},
-// 		{
-// 			input:       nil,
-// 			expectedErr: false,
-// 			expected:    "null",
-// 			description: "input invalid",
-// 		},
-// 	}
-// 	for _, test := range tests {
-// 		t.Run(test.description, func(t *testing.T) {
-// 			out, err := marshalHostsToStr(test.input)
-// 			assert.NoError(t, err)
-// 			assert.Equal(t, test.expected, out)
-// 		})
-// 	}
-// }
