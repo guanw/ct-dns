@@ -10,6 +10,9 @@ BINARY_UNIX=$(BINARY_NAME)_unix
 all: test build
 fmt:
 	go fmt ./...
+install:
+	@which dep > /dev/null || curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+	dep ensure -vendor-only
 build:
 	$(GOBUILD) -o $(BINARY_NAME) -v
 test:

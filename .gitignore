@@ -2,3 +2,4 @@
 **/.DS_Store
 ct_dns_binary*
 IDL/**/*.pb.go
+vendor/
