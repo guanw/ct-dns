@@ -15,6 +15,13 @@ install:
 	dep ensure -vendor-only
 build:
 	$(GOBUILD) -o $(BINARY_NAME) -v
+# Cross compilation
+build-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_UNIX) -v
+
+run:
+	$(GOBUILD) -o $(BINARY_NAME) -v
+	./$(BINARY_NAME)
 test:
 	$(GOTEST) -v ./...
 clean:
@@ -35,13 +42,8 @@ etcd-kube:
 
 dynamodb-single-cluster:
 	docker run -d -it -p 8000:8000 dwmkerr/dynamodb -sharedDb
-# run:
-# 	$(GOBUILD) -o $(BINARY_NAME) -v ./...
-# 	./$(BINARY_NAME)
 
-
-# Cross compilation
-build-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_UNIX) -v
 docker-build:
-	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/github.com/guanw/ct-dns golang:latest go build -o "$(BINARY_UNIX)" -v
+	docker build -t ct-dns .
+docker-run:
+	docker run -d --rm -p 8080:8080 -p 50051:50051 ct-dns
