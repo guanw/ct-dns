@@ -5,7 +5,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/guanw/ct-dns/pkg/storage"
+	"github.com/guanw/ct-dns/storage"
 )
 
 type memory interface {

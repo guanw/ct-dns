@@ -3,20 +3,22 @@ package store
 import (
 	"encoding/json"
 
-	"github.com/guanw/ct-dns/pkg/storage"
+	storageInterface "github.com/guanw/ct-dns/storage"
 	"github.com/pkg/errors"
 )
 
+// Store defines interface
 type Store interface {
 	GetService(serviceName string) ([]string, error)
 	UpdateService(serviceName, operation, Host string) error
 }
 
 type store struct {
-	Client storage.Client
+	Client storageInterface.Client
 }
 
-func NewStore(client storage.Client) *store {
+// NewStore creates new store instance
+func NewStore(client storageInterface.Client) Store {
 	return &store{
 		Client: client,
 	}

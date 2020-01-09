@@ -7,16 +7,13 @@ import (
 
 	"net/http"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/gorilla/mux"
 	config "github.com/guanw/ct-dns/cmd"
 	dns "github.com/guanw/ct-dns/pkg/grpc"
 	pb "github.com/guanw/ct-dns/pkg/grpc/proto-gen"
 	ctHttp "github.com/guanw/ct-dns/pkg/http"
-	ctdynamodb "github.com/guanw/ct-dns/pkg/storage/dynamodb"
 	"github.com/guanw/ct-dns/pkg/store"
+	"github.com/guanw/ct-dns/plugins/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -24,30 +21,13 @@ import (
 
 func main() {
 	cfg := config.ReadConfig("./config/")
-	var endpoints []string
-	for _, v := range cfg.Etcd {
-		endpoints = append(endpoints, "http://"+v.Host+":"+v.Port)
+
+	f := storage.NewFactory()
+	client, err := f.Initialize("dynamodb")
+	if err != nil {
+		log.Fatalf("Failed to start storage client: %v", err)
 	}
-	// etcdCfg := client.Config{
-	// 	Endpoints: endpoints,
-	// }
-
-	// c, err := client.New(etcdCfg)
-	// if err != nil {
-	// 	// handle error
-	// 	log.Fatalf(errors.Wrap(err, "Cannot initialize the etcd client").Error())
-	// }
-
-	// etcdCli := etcd.NewClient(client.NewKeysAPI(c))
-	// store := store.NewStore(etcdCli)
-
-	sess := session.Must(session.NewSession(&aws.Config{
-		Region:   aws.String("us-east-1"),
-		Endpoint: aws.String("http://localhost:8000"),
-	}))
-	db := dynamodb.New(sess)
-
-	store := store.NewStore(ctdynamodb.NewClient(db))
+	store := store.NewStore(client)
 
 	dnsServer := dns.NewServer(store)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.GRPCPort))

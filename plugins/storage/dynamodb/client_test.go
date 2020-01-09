@@ -6,7 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/guanw/ct-dns/pkg/storage/dynamodb/mocks"
+	"github.com/guanw/ct-dns/plugins/storage/dynamodb/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

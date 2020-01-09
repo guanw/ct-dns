@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/guanw/ct-dns/pkg/storage"
+	"github.com/guanw/ct-dns/storage"
 	"go.etcd.io/etcd/client"
 )
 
