@@ -11,7 +11,7 @@ all: test build
 fmt:
 	go fmt ./...
 install:
-	env GO111MODULE=on go build
+	env GO111MODULE=auto go build
 build:
 	$(GOBUILD) -o $(BINARY_NAME) -v
 # Cross compilation
@@ -22,7 +22,7 @@ run:
 	$(GOBUILD) -o $(BINARY_NAME) -v
 	./$(BINARY_NAME)
 test:
-	env GO111MODULE=on $(GOTEST) -v ./...
+	env GO111MODULE=auto $(GOTEST) -v ./...
 clean:
 	$(GOCLEAN)
 	rm -f $(BINARY_NAME)
