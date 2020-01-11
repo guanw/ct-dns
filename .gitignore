@@ -3,3 +3,5 @@
 ct_dns_binary*
 IDL/**/*.pb.go
 vendor/
+coverage.txt
+*.code-workspace

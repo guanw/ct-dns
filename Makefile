@@ -43,6 +43,10 @@ etcd-kube:
 dynamodb-single-cluster:
 	docker run -d -it -p 8000:8000 dwmkerr/dynamodb -sharedDb
 
+redis-single-cluster:
+	docker run -d -p 6379:6379 --name dns-redis redis
+	docker exec -it dns-redis sh
+
 docker-build:
 	docker build -t ct-dns .
 docker-run:

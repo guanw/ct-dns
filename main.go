@@ -23,7 +23,7 @@ func main() {
 	cfg := config.ReadConfig("./config/")
 
 	f := storage.NewFactory()
-	client, err := f.Initialize("dynamodb")
+	client, err := f.Initialize("redis")
 	if err != nil {
 		log.Fatalf("Failed to start storage client: %v", err)
 	}
