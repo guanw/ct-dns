@@ -23,7 +23,7 @@ for storage options
 
 You will see both http and grpc server up and running like following in console:
 
-![server output](https://ibb.co/s3tS1gv "Server output")
+![server output](https://photos.app.goo.gl/sC6H2quRqkyYWpAM6 "Server output")
 
 # Start up local etcd cluster:
 
