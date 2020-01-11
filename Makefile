@@ -11,8 +11,7 @@ all: test build
 fmt:
 	go fmt ./...
 install:
-	@which dep > /dev/null || curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-	dep ensure -vendor-only
+	env GO111MODULE=on go build
 build:
 	$(GOBUILD) -o $(BINARY_NAME) -v
 # Cross compilation
@@ -23,7 +22,7 @@ run:
 	$(GOBUILD) -o $(BINARY_NAME) -v
 	./$(BINARY_NAME)
 test:
-	$(GOTEST) -v ./...
+	env GO111MODULE=on $(GOTEST) -v ./...
 clean:
 	$(GOCLEAN)
 	rm -f $(BINARY_NAME)
