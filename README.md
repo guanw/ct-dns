@@ -23,7 +23,7 @@ for storage options
 
 You will see both http and grpc server up and running like following in console:
 
-![server output](https://photos.app.goo.gl/sC6H2quRqkyYWpAM6)
+<img src="https://scionplu.sirv.com/Images/server.png" width="500" height="30" alt="" />
 
 # Start up local etcd cluster:
 
