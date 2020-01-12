@@ -67,8 +67,7 @@ func (m *memoryInstance) delete(key, value string) {
 
 // Client defines storage client using memory
 type Client struct {
-	m    memory
-	lock sync.Mutex
+	m memory
 }
 
 // NewClient creates new memory client

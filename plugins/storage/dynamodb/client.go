@@ -38,8 +38,8 @@ func NewClient(db DynamodbClient) storage.Client {
 }
 
 type keyValuePair struct {
-	Service string `dynamodbav: "Service"`
-	Host    string `dynamodbav: "Host"`
+	Service string `dynamodbav:"Service"`
+	Host    string `dynamodbav:"Host"`
 }
 
 // Create create new entry with key as primary key and value as secondary partition key
