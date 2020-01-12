@@ -22,6 +22,10 @@ func Test_NewFactory(t *testing.T) {
 			factoryType: "memory",
 		},
 		{
+			expectedErr: false,
+			factoryType: "redis",
+		},
+		{
 			expectedErr: true,
 			factoryType: "unknown",
 		},
