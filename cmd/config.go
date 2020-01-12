@@ -11,7 +11,7 @@ import (
 type config struct {
 	Etcd     []etcdConfig `yaml:"etcd"`
 	HTTPPort string       `yaml:"httpport"`
-	GRPCPort string       `yaml:"grpcport`
+	GRPCPort string       `yaml:"grpcport"`
 }
 
 type etcdConfig struct {

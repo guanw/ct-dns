@@ -43,7 +43,8 @@ func Test_DeleteExistingKey(t *testing.T) {
 	m := NewClient()
 	m.Create("dummy-service", "192.0.0.1")
 	m.Create("dummy-service", "192.0.0.2")
-	m.Delete("dummy-service", "192.0.0.1")
+	err := m.Delete("dummy-service", "192.0.0.1")
+	assert.NoError(t, err)
 	res, err := m.Get("dummy-service")
 	assert.NoError(t, err)
 	assert.Equal(t, `["192.0.0.2"]`, res)
@@ -51,7 +52,8 @@ func Test_DeleteExistingKey(t *testing.T) {
 
 func Test_DeleteNonExistingFirstKey(t *testing.T) {
 	m := NewClient()
-	m.Delete("dummy-service", "192.0.0.1")
+	err := m.Delete("dummy-service", "192.0.0.1")
+	assert.NoError(t, err)
 	res, err := m.Get("dummy-service")
 	assert.Error(t, err)
 	assert.Equal(t, ``, res)

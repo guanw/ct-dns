@@ -33,18 +33,17 @@ func (m *memoryInstance) put(key, value string) {
 		m.data[key] = make(map[string]interface{})
 	}
 	m.data[key][value] = true
-	return
 }
 
 func (m *memoryInstance) get(key string) ([]string, error) {
 	m.lock.Lock()
-	m.lock.Unlock()
+	defer m.lock.Unlock()
 	_, found := m.data[key]
 	if !found {
 		return nil, errors.New("key not found")
 	}
 	var res []string
-	for nestedK, _ := range m.data[key] {
+	for nestedK := range m.data[key] {
 		res = append(res, nestedK)
 	}
 	return res, nil
@@ -52,7 +51,7 @@ func (m *memoryInstance) get(key string) ([]string, error) {
 
 func (m *memoryInstance) delete(key, value string) {
 	m.lock.Lock()
-	m.lock.Unlock()
+	defer m.lock.Unlock()
 	nestedMap, found := m.data[key]
 	if !found {
 		return
