@@ -5,7 +5,6 @@ import (
 	"log"
 	"net"
 	"testing"
-	"time"
 
 	pb "github.com/guanw/ct-dns/pkg/grpc/proto-gen"
 	"github.com/guanw/ct-dns/pkg/store"
@@ -30,7 +29,7 @@ func initialize(store store.Store) {
 	}()
 }
 
-func bufDialer(string, time.Duration) (net.Conn, error) {
+func bufDialer(context.Context, string) (net.Conn, error) {
 	return lis.Dial()
 }
 
@@ -39,7 +38,7 @@ func Test_GetServiceSucceed(t *testing.T) {
 	store.On("GetService", "valid-service").Return([]string{"192.0.0.1"}, nil)
 	initialize(store)
 	ctx := context.Background()
-	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithDialer(bufDialer), grpc.WithInsecure())
+	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
 	if err != nil {
 		t.Fatalf("Failed to dial bufnet: %v", err)
 	}
@@ -57,7 +56,7 @@ func Test_PostService(t *testing.T) {
 	store.On("UpdateService", "valid-service", "add", "192.0.0.1").Return(nil)
 	initialize(store)
 	ctx := context.Background()
-	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithDialer(bufDialer), grpc.WithInsecure())
+	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
 	if err != nil {
 		t.Fatalf("Failed to dial bufnet: %v", err)
 	}

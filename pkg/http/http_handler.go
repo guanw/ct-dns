@@ -32,7 +32,6 @@ func (aH *Handler) RegisterRoutes(router *mux.Router) {
 // HealthService process healthcheck GET request
 func (aH *Handler) HealthService(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	return
 }
 
 // GetService process GET service request
@@ -73,9 +72,9 @@ func (aH *Handler) PostService(w http.ResponseWriter, r *http.Request) {
 }
 
 type postBody struct {
-	ServiceName string `json:'serviceName'`
-	Operation   string `json:'operation'`
-	Host        string `json:'host'`
+	ServiceName string `json:"serviceName"`
+	Operation   string `json:"operation"`
+	Host        string `json:"host"`
 }
 
 func decodeBody(in io.Reader) (postBody, error) {
