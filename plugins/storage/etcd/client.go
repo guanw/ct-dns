@@ -10,7 +10,7 @@ import (
 	"go.etcd.io/etcd/client"
 )
 
-// Client defines api client for set/get operations
+// Client defines api client for Create/Get/Delete operations
 type Client struct {
 	API  client.KeysAPI
 	lock sync.Mutex

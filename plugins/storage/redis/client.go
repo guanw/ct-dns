@@ -2,17 +2,26 @@ package redis
 
 import (
 	"encoding/json"
+	"sync"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/guanw/ct-dns/storage"
 	"github.com/pkg/errors"
 )
 
-type Client struct {
-	Pool *redis.Pool
+// Pool defines interface for redis.Pool
+type Pool interface {
+	Get() redis.Conn
 }
 
-func NewClient(pool *redis.Pool) storage.Client {
+// Client defines redis client for Create/Get/Delete operations
+type Client struct {
+	Pool Pool
+	lock sync.Mutex
+}
+
+// NewClient creates new redis client
+func NewClient(pool Pool) storage.Client {
 	return &Client{
 		Pool: pool,
 	}
@@ -22,7 +31,9 @@ func NewClient(pool *redis.Pool) storage.Client {
 func (c *Client) Create(key, value string) error {
 	ins := c.Pool.Get()
 	defer ins.Close()
+	c.lock.Lock()
 	_, err := ins.Do("SADD", key, value)
+	c.lock.Unlock()
 	return err
 }
 
@@ -30,7 +41,9 @@ func (c *Client) Create(key, value string) error {
 func (c *Client) Get(key string) (string, error) {
 	ins := c.Pool.Get()
 	defer ins.Close()
+	c.lock.Lock()
 	reply, err := ins.Do("SMEMBERS", key)
+	c.lock.Unlock()
 	res, err := redis.Strings(reply, err)
 	if err != nil {
 		return "", errors.Wrap(err, "Failed to get member from key")
@@ -43,6 +56,8 @@ func (c *Client) Get(key string) (string, error) {
 func (c *Client) Delete(key, value string) error {
 	ins := c.Pool.Get()
 	defer ins.Close()
+	c.lock.Lock()
 	_, err := ins.Do("SREM", key, value)
+	c.lock.Unlock()
 	return err
 }
