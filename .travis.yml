@@ -1,17 +1,14 @@
 language: go
 
 go:
-  - 1.11.x
-  - 1.12.x
+  - 1.13.x
 
-install:
-  - make install
+install: true
 
 script:
   - ./go.test.sh
 
-env:
-  - CODECOV_TOKEN="b00b9ce7-4ad6-4d62-b590-16eb78a082ca"
+env: GO111MODULE=auto CODECOV_TOKEN="b00b9ce7-4ad6-4d62-b590-16eb78a082ca"
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
