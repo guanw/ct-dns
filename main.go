@@ -58,10 +58,7 @@ func main() {
 			httpHandler := ctHttp.NewHandler(store)
 			httpHandler.RegisterRoutes(r)
 			log.Printf("http server listening at port %s", cfg.HTTPPort)
-			if err = http.ListenAndServe("0.0.0.0:"+cfg.HTTPPort, r); err != nil {
-				return err
-			}
-			return nil
+			return http.ListenAndServe("0.0.0.0:"+cfg.HTTPPort, r)
 		},
 	}
 	AddFlags(v, command)
