@@ -8,6 +8,7 @@ import (
 	"github.com/guanw/ct-dns/plugins/storage/memory"
 	"github.com/guanw/ct-dns/plugins/storage/redis"
 	"github.com/guanw/ct-dns/storage"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -19,20 +20,20 @@ const (
 
 // Factory defines interface for factory
 type Factory interface {
-	Initialize(factoryType string) (storage.Client, error)
+	Initialize(v *viper.Viper, factoryType string) (storage.Client, error)
 }
 
 type factory struct {
 }
 
-func (f *factory) Initialize(factoryType string) (storage.Client, error) {
+func (f *factory) Initialize(v *viper.Viper, factoryType string) (storage.Client, error) {
 	switch factoryType {
 	case memoryStorageType:
 		return memory.NewFactory()
 	case etcdStorageType:
 		return etcd.NewFactory()
 	case dynamodbStorageType:
-		return dynamodb.NewFactory()
+		return dynamodb.NewFactory(v)
 	case redisStorageType:
 		return redis.NewFactory()
 	default:

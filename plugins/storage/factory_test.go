@@ -1,8 +1,11 @@
 package storage
 
-import "testing"
+import (
+	"testing"
 
-import "github.com/stretchr/testify/assert"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
+)
 
 func Test_NewFactory(t *testing.T) {
 	tests := []struct {
@@ -32,7 +35,8 @@ func Test_NewFactory(t *testing.T) {
 	}
 	for _, test := range tests {
 		f := NewFactory()
-		_, err := f.Initialize(test.factoryType)
+		v := viper.New()
+		_, err := f.Initialize(v, test.factoryType)
 		if test.expectedErr {
 			assert.Error(t, err)
 		} else {
