@@ -71,6 +71,7 @@ func main() {
 	}
 }
 
+// AddFlags applies binding flags to initialize app
 func AddFlags(v *viper.Viper, command *cobra.Command) {
 	flagSet := new(flag.FlagSet)
 
