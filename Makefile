@@ -8,6 +8,8 @@ BINARY_NAME=ct_dns_binary
 BINARY_UNIX=$(BINARY_NAME)_unix
 
 all: test build
+lint:
+	revive -formatter friendly github.com/guanw/ct-dns
 fmt:
 	go fmt ./...
 	golangci-lint run ./...
