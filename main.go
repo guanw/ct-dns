@@ -58,10 +58,7 @@ func main() {
 			httpHandler := ctHttp.NewHandler(store)
 			httpHandler.RegisterRoutes(r)
 			log.Printf("http server listening at port %s", cfg.HTTPPort)
-			if err = http.ListenAndServe("0.0.0.0:"+cfg.HTTPPort, r); err != nil {
-				return err
-			}
-			return nil
+			return http.ListenAndServe("0.0.0.0:"+cfg.HTTPPort, r)
 		},
 	}
 	AddFlags(v, command)
@@ -78,5 +75,6 @@ func AddFlags(v *viper.Viper, command *cobra.Command) {
 	dynamodb.AddFlags(flagSet)
 
 	command.Flags().AddGoFlagSet(flagSet)
+	// v.BindFlagValues(command.Flags())
 	v.BindPFlags(command.Flags())
 }
