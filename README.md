@@ -9,6 +9,7 @@ for interfacing and
 
 - dynamodb
 - etcd
+- redis
 - memory (mainly for testing it out)
 
 for storage options
