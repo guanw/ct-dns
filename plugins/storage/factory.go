@@ -35,7 +35,7 @@ func (f *factory) Initialize(v *viper.Viper, factoryType string) (storage.Client
 	case dynamodbStorageType:
 		return dynamodb.NewFactory(v)
 	case redisStorageType:
-		return redis.NewFactory()
+		return redis.NewFactory(v)
 	default:
 		return nil, errors.New("Failed to initialize storage factory")
 	}
