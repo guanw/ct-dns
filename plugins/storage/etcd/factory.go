@@ -1,28 +1,30 @@
 package etcd
 
 import (
+	"strings"
+
 	"github.com/guanw/ct-dns/storage"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"go.etcd.io/etcd/client"
 )
 
-// NewFactory creates new etcd factory
-func NewFactory() (storage.Client, error) {
-	var endpoints []string
-	etcd := []struct {
-		Host string
-		Port string
-	}{
-		{
-			Host: "10.110.251.205",
-			Port: "2379",
-		},
-	}
-	for _, v := range etcd {
-		endpoints = append(endpoints, "http://"+v.Host+":"+v.Port)
-	}
-	etcdCfg := client.Config{
+type builder struct {
+	Endpoints []string
+}
+
+func initFromViper(v *viper.Viper) *builder {
+	endpoints := strings.Split(v.GetString("etcd-endpoints"), ",")
+	return &builder{
 		Endpoints: endpoints,
+	}
+}
+
+// NewFactory creates new etcd factory
+func NewFactory(v *viper.Viper) (storage.Client, error) {
+	b := initFromViper(v)
+	etcdCfg := client.Config{
+		Endpoints: b.Endpoints,
 	}
 
 	c, err := client.New(etcdCfg)

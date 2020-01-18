@@ -31,7 +31,7 @@ func (f *factory) Initialize(v *viper.Viper, factoryType string) (storage.Client
 	case memoryStorageType:
 		return memory.NewFactory()
 	case etcdStorageType:
-		return etcd.NewFactory()
+		return etcd.NewFactory(v)
 	case dynamodbStorageType:
 		return dynamodb.NewFactory(v)
 	case redisStorageType:

@@ -17,6 +17,7 @@ import (
 	"github.com/guanw/ct-dns/pkg/store"
 	"github.com/guanw/ct-dns/plugins/storage"
 	"github.com/guanw/ct-dns/plugins/storage/dynamodb"
+	"github.com/guanw/ct-dns/plugins/storage/etcd"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -73,8 +74,8 @@ func AddFlags(v *viper.Viper, command *cobra.Command) {
 	flagSet := new(flag.FlagSet)
 
 	dynamodb.AddFlags(flagSet)
+	etcd.AddFlags(flagSet)
 
 	command.Flags().AddGoFlagSet(flagSet)
-	// v.BindFlagValues(command.Flags())
 	v.BindPFlags(command.Flags())
 }
