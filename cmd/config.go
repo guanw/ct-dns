@@ -8,7 +8,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-type config struct {
+// Config contains config for ct-dns service
+type Config struct {
 	Etcd     []etcdConfig `yaml:"etcd"`
 	HTTPPort string       `yaml:"httpport"`
 	GRPCPort string       `yaml:"grpcport"`
@@ -20,7 +21,7 @@ type etcdConfig struct {
 }
 
 // ReadConfig reads config file based on env
-func ReadConfig(path string) config {
+func ReadConfig(path string) Config {
 	viper.AddConfigPath(path)
 	fmt.Println(os.Getenv("CT_DNS_ENV"))
 	if os.Getenv("CT_DNS_ENV") == "PRODUCTION" {
@@ -32,7 +33,7 @@ func ReadConfig(path string) config {
 	if err != nil {
 		log.Fatalln("Failed to read config", err)
 	}
-	var c config
+	var c Config
 	err = viper.Unmarshal(&c)
 	if err != nil {
 		log.Fatalln("Failed to unmarshal config", err)

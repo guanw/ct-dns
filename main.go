@@ -75,5 +75,6 @@ func AddFlags(v *viper.Viper, command *cobra.Command) {
 	dynamodb.AddFlags(flagSet)
 
 	command.Flags().AddGoFlagSet(flagSet)
+	// v.BindFlagValues(command.Flags())
 	v.BindPFlags(command.Flags())
 }

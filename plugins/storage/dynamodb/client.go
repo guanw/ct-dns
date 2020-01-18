@@ -11,14 +11,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Client defines api client for set/get operations
-type Client struct {
-	DB   DynamodbClient
+// DClient defines dynamodb client instance
+type DClient struct {
+	DB   Client
 	lock sync.Mutex
 }
 
-// DynamodbClient defines the interface for dynamodb client
-type DynamodbClient interface {
+// Client defines the interface for dynamodb client
+type Client interface {
 	Query(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error)
 	PutItem(putItemInput *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error)
 	DeleteItem(deleteItemInput *dynamodb.DeleteItemInput) (*dynamodb.DeleteItemOutput, error)
@@ -31,8 +31,8 @@ type Params struct {
 }
 
 // NewClient creates new api client
-func NewClient(db DynamodbClient) storage.Client {
-	return &Client{
+func NewClient(db Client) storage.Client {
+	return &DClient{
 		DB: db,
 	}
 }
@@ -43,7 +43,7 @@ type keyValuePair struct {
 }
 
 // Create create new entry with key as primary key and value as secondary partition key
-func (c *Client) Create(key, value string) error {
+func (c *DClient) Create(key, value string) error {
 	s := keyValuePair{
 		Service: key,
 		Host:    value,
@@ -65,7 +65,7 @@ func (c *Client) Create(key, value string) error {
 }
 
 // Get gets hosts under primary key
-func (c *Client) Get(key string) (string, error) {
+func (c *DClient) Get(key string) (string, error) {
 
 	params := &dynamodb.QueryInput{
 		KeyConditionExpression: aws.String("Service = :service"),
@@ -97,7 +97,7 @@ func (c *Client) Get(key string) (string, error) {
 }
 
 // Delete deletes records with key as primary key and value as secondary key
-func (c *Client) Delete(key, value string) error {
+func (c *DClient) Delete(key, value string) error {
 	s := keyValuePair{
 		Service: key,
 		Host:    value,
