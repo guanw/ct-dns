@@ -9,7 +9,7 @@ for interfacing and
 
 - dynamodb
 - etcd
-- memory
+- memory (mainly for testing it out)
 
 for storage options
 
