@@ -16,6 +16,10 @@ fmt:
 install:
 	@which dep > /dev/null || curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 	dep ensure -vendor-only
+
+install-cobra:
+	go install github.com/guanw/ct-dns
+
 build:
 	$(GOBUILD) -o $(BINARY_NAME) -v
 # Cross compilation
@@ -41,13 +45,13 @@ etcd-kube:
 	cd etcd && kubectl apply -f etcd-sts.yaml
 	minikube tunnel &
 	kubectl get all -n default | grep etcd-client
-	echo "replace config/development.yaml host with the public ip above"
+	echo "pass the public ip above to --etcd-endpoints"
 
 dynamodb-single-cluster:
 	docker run -d -it -p 8000:8000 dwmkerr/dynamodb -sharedDb
 
 redis-single-cluster:
-	docker run -d -p 6379:6379 --name dns-redis redis
+	docker stop dns-redis && docker rm dns-redis && docker run -d -p 6379:6379 --name dns-redis redis
 	docker exec -it dns-redis sh
 
 docker-build:

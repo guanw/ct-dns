@@ -3,6 +3,7 @@ package storage
 import (
 	"testing"
 
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,10 +34,14 @@ func Test_NewFactory(t *testing.T) {
 			factoryType: "unknown",
 		},
 	}
+
 	for _, test := range tests {
-		f := NewFactory()
 		v := viper.New()
-		_, err := f.Initialize(v, test.factoryType)
+		flagSet := new(pflag.FlagSet)
+		flagSet.String("storage-type", test.factoryType, "--storage-type <name>")
+		v.BindPFlags(flagSet)
+		f := NewFactory(v)
+		_, err := f.Initialize()
 		if test.expectedErr {
 			assert.Error(t, err)
 		} else {
