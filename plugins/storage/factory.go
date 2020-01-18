@@ -20,28 +20,33 @@ const (
 
 // Factory defines interface for factory
 type Factory interface {
-	Initialize(v *viper.Viper, factoryType string) (storage.Client, error)
+	Initialize() (storage.Client, error)
 }
 
 type factory struct {
+	StorageType string
+	V           *viper.Viper
 }
 
-func (f *factory) Initialize(v *viper.Viper, factoryType string) (storage.Client, error) {
-	switch factoryType {
+func (f *factory) Initialize() (storage.Client, error) {
+	switch f.StorageType {
 	case memoryStorageType:
 		return memory.NewFactory()
 	case etcdStorageType:
-		return etcd.NewFactory(v)
+		return etcd.NewFactory(f.V)
 	case dynamodbStorageType:
-		return dynamodb.NewFactory(v)
+		return dynamodb.NewFactory(f.V)
 	case redisStorageType:
-		return redis.NewFactory(v)
+		return redis.NewFactory(f.V)
 	default:
 		return nil, errors.New("Failed to initialize storage factory")
 	}
 }
 
 // NewFactory creates storage factory instance
-func NewFactory() Factory {
-	return &factory{}
+func NewFactory(v *viper.Viper) Factory {
+	return &factory{
+		V:           v,
+		StorageType: v.GetString("storage-type"),
+	}
 }

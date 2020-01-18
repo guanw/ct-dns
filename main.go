@@ -35,8 +35,8 @@ func main() {
 		Short: "ct-dns register and update host information for specific service",
 		Long:  `ct-dns register and update host information for specific service, User can configure different storage types using terminal flag`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			f := storage.NewFactory()
-			client, err := f.Initialize(v, "dynamodb")
+			f := storage.NewFactory(v)
+			client, err := f.Initialize()
 			if err != nil {
 				return errors.Wrap(err, "Failed to start storage client")
 			}
@@ -77,6 +77,7 @@ func AddFlags(v *viper.Viper, command *cobra.Command) {
 	dynamodb.AddFlags(flagSet)
 	etcd.AddFlags(flagSet)
 	redis.AddFlags(flagSet)
+	storage.AddFlags(flagSet)
 
 	command.Flags().AddGoFlagSet(flagSet)
 	v.BindPFlags(command.Flags())
