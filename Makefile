@@ -61,4 +61,4 @@ docker-run:
 	docker run -d --rm -p 8080:8080 -p 50051:50051 ct-dns
 
 envoy:
-	envoy -c envoy_config.yaml -l debug
+	envoy -c ./envoy/envoy_config.yaml -l debug
