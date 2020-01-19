@@ -52,6 +52,7 @@ func main() {
 			healthServer.SetServingStatus("ct-dns", grpc_health_v1.HealthCheckResponse_SERVING)
 			grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
 			pb.RegisterDnsServer(grpcServer, dnsServer)
+
 			go grpcServer.Serve(lis)
 			defer grpcServer.Stop()
 			log.Printf("grpc server listening at port %s", cfg.GRPCPort)

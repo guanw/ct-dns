@@ -48,6 +48,14 @@
   version = "v1.27.2"
 
 [[projects]]
+  branch = "master"
+  digest = "1:122ce33033b7a593971afb5eed12cb3660aa00bdc309a1e64e692b7cfd730d7f"
+  name = "github.com/cncf/udpa"
+  packages = ["go/udpa/annotations"]
+  pruneopts = "UT"
+  revision = "edbea6a78f6d1ba34edc69c53a396b1d88d59651"
+
+[[projects]]
   digest = "1:05ffeeed3f0f05520de0679f6aa3219ffee69cfd6d9fb6c194879d4c818ad670"
   name = "github.com/coreos/go-semver"
   packages = ["semver"]
@@ -64,6 +72,44 @@
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:f9661e06ada06fecbcc65ff5a510e02c110c22d9b229ac34eb2472744ee572c1"
+  name = "github.com/envoyproxy/go-control-plane"
+  packages = [
+    "envoy/annotations",
+    "envoy/api/v2",
+    "envoy/api/v2/auth",
+    "envoy/api/v2/cluster",
+    "envoy/api/v2/core",
+    "envoy/api/v2/endpoint",
+    "envoy/api/v2/listener",
+    "envoy/api/v2/route",
+    "envoy/config/filter/accesslog/v2",
+    "envoy/config/filter/network/http_connection_manager/v2",
+    "envoy/config/listener/v2",
+    "envoy/service/discovery/v2",
+    "envoy/type",
+    "envoy/type/matcher",
+    "envoy/type/metadata/v2",
+    "envoy/type/tracing/v2",
+    "pkg/cache",
+    "pkg/conversion",
+    "pkg/log",
+    "pkg/server",
+    "pkg/wellknown",
+  ]
+  pruneopts = "UT"
+  revision = "4a76df0f765af204156f19ce2767b9a33d4e69b3"
+  version = "v0.9.2"
+
+[[projects]]
+  digest = "1:743f8008a7fed04ef0d52261aef346766bbd5b3e360b90296d85289f8ef5c2e2"
+  name = "github.com/envoyproxy/protoc-gen-validate"
+  packages = ["validate"]
+  pruneopts = "UT"
+  revision = "9eff07ddfcb4001aa1aab280648153f46e1a8ddc"
+  version = "v0.1.0"
+
+[[projects]]
   digest = "1:abeb38ade3f32a92943e5be54f55ed6d6e3b6602761d74b4aab4c9dd45c18abd"
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
@@ -72,14 +118,19 @@
   version = "v1.4.7"
 
 [[projects]]
-  digest = "1:f5ce1529abc1204444ec73779f44f94e2fa8fcdb7aca3c355b0c95947e4005c6"
+  digest = "1:fab646d893820242d3a211d2521f40d2bd4b75783ca64a8d60dccc4f54ecfea1"
   name = "github.com/golang/protobuf"
   packages = [
+    "jsonpb",
     "proto",
+    "protoc-gen-go/descriptor",
     "ptypes",
     "ptypes/any",
     "ptypes/duration",
+    "ptypes/empty",
+    "ptypes/struct",
     "ptypes/timestamp",
+    "ptypes/wrappers",
   ]
   pruneopts = "UT"
   revision = "6c65a5562fc06764971b7c5d05c76c75e84bdbf7"
@@ -344,9 +395,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:583a0c80f5e3a9343d33aea4aead1e1afcc0043db66fdf961ddd1fe8cd3a4faf"
+  digest = "1:47f71acc1fcf36eab181789c2c0735ddcaa22592091a551375c841a912a0a1df"
   name = "google.golang.org/genproto"
-  packages = ["googleapis/rpc/status"]
+  packages = [
+    "googleapis/api/annotations",
+    "googleapis/rpc/status",
+  ]
   pruneopts = "UT"
   revision = "f3c370f40bfba3cb25c5c2f823a1a8031b5ad724"
 
@@ -422,11 +476,16 @@
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/dynamodb",
     "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute",
+    "github.com/envoyproxy/go-control-plane/envoy/api/v2",
+    "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v2",
+    "github.com/envoyproxy/go-control-plane/pkg/cache",
+    "github.com/envoyproxy/go-control-plane/pkg/server",
     "github.com/golang/protobuf/proto",
     "github.com/gomodule/redigo/redis",
     "github.com/gorilla/mux",
     "github.com/pkg/errors",
     "github.com/spf13/cobra",
+    "github.com/spf13/pflag",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/mock",
