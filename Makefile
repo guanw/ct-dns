@@ -56,5 +56,9 @@ redis-single-cluster:
 
 docker-build:
 	docker build -t ct-dns .
+
 docker-run:
 	docker run -d --rm -p 8080:8080 -p 50051:50051 ct-dns
+
+envoy:
+	envoy -c ./envoy/envoy_config.yaml -l debug
