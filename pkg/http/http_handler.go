@@ -15,13 +15,15 @@ import (
 
 // Handler use etcd client to query
 type Handler struct {
-	Store store.Store
+	Store   store.Store
+	Metrics *Metrics
 }
 
 // NewHandler creates a new Handler
-func NewHandler(store store.Store) *Handler {
+func NewHandler(store store.Store, metrics *Metrics) *Handler {
 	return &Handler{
-		Store: store,
+		Store:   store,
+		Metrics: metrics,
 	}
 }
 
@@ -39,11 +41,13 @@ func (aH *Handler) DiscoveryEndpointsV2(w http.ResponseWriter, r *http.Request) 
 	buf := new(bytes.Buffer)
 	_, err := buf.ReadFrom(r.Body)
 	if err != nil {
+		aH.Metrics.V2DiscoveryFailure.Inc()
 		http.Error(w, errors.Wrap(err, "Failed to read endpoint v2 body from buff").Error(), http.StatusUnprocessableEntity)
 	}
 
 	var body edsV2Req
 	if err := json.Unmarshal(buf.Bytes(), &body); err != nil {
+		aH.Metrics.V2DiscoveryFailure.Inc()
 		http.Error(w, errors.Wrap(err, "Failed to decode the eds endpoint v2 request body").Error(), http.StatusUnprocessableEntity)
 	}
 
@@ -55,12 +59,14 @@ func (aH *Handler) DiscoveryEndpointsV2(w http.ResponseWriter, r *http.Request) 
 		serviceName := r
 		hosts, err := aH.Store.GetService(serviceName)
 		if err != nil {
+			aH.Metrics.V2DiscoveryFailure.Inc()
 			http.Error(w, err.Error(), http.StatusNotFound)
 		}
 		var eps []lbEndpointV2
 		for _, url := range hosts {
 			host, port, err := parseHostPort(url)
 			if err != nil {
+				aH.Metrics.V2DiscoveryFailure.Inc()
 				http.Error(w, err.Error(), http.StatusBadGateway)
 				return
 			}
@@ -86,6 +92,7 @@ func (aH *Handler) DiscoveryEndpointsV2(w http.ResponseWriter, r *http.Request) 
 			},
 		})
 	}
+	aH.Metrics.V2DiscoverySuccess.Inc()
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
 }
@@ -132,6 +139,7 @@ func (aH *Handler) RegistrationServiceV1(w http.ResponseWriter, r *http.Request)
 	serviceName := vars["serviceName"]
 	hosts, err := aH.Store.GetService(serviceName)
 	if err != nil {
+		aH.Metrics.V1RegistrationFailure.Inc()
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -140,6 +148,7 @@ func (aH *Handler) RegistrationServiceV1(w http.ResponseWriter, r *http.Request)
 	for _, h := range hosts {
 		host, port, err := parseHostPort(h)
 		if err != nil {
+			aH.Metrics.V1RegistrationFailure.Inc()
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
 		}
@@ -157,6 +166,7 @@ func (aH *Handler) RegistrationServiceV1(w http.ResponseWriter, r *http.Request)
 		Hosts: hostsV1,
 	}
 	w.WriteHeader(http.StatusOK)
+	aH.Metrics.V1RegistrationSuccess.Inc()
 	json.NewEncoder(w).Encode(resp)
 }
 
@@ -178,6 +188,7 @@ type tagsV1 struct {
 
 // HealthService process healthcheck GET request
 func (aH *Handler) HealthService(w http.ResponseWriter, r *http.Request) {
+	aH.Metrics.HealthcheckSuccess.Inc()
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -190,10 +201,12 @@ func (aH *Handler) GetService(w http.ResponseWriter, r *http.Request) {
 		hosts, err := aH.Store.GetService(serviceName)
 		w.Header().Set("Content-Type", "application/json")
 		if err != nil {
+			aH.Metrics.GetServiceFailure.Inc()
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
+		aH.Metrics.GetServiceSuccess.Inc()
 		json.NewEncoder(w).Encode(hosts)
 	default:
 		http.Error(w, "Unsupported Request Operation", http.StatusMethodNotAllowed)
@@ -206,6 +219,7 @@ func (aH *Handler) PostService(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		b, err := decodeBody(r.Body)
 		if err != nil {
+			aH.Metrics.PostServiceFailure.Inc()
 			http.Error(w, errors.Wrap(err, "Failed to decode the Post request body").Error(), http.StatusUnprocessableEntity)
 			return
 		}
@@ -213,7 +227,9 @@ func (aH *Handler) PostService(w http.ResponseWriter, r *http.Request) {
 		_ = aH.Store.UpdateService(b.ServiceName, b.Operation, b.Host)
 		// TODO think of way to log logic error and not panic
 		w.Header().Set("Content-Type", "application/json")
+		aH.Metrics.PostServiceSuccess.Inc()
 	default:
+		aH.Metrics.PostServiceFailure.Inc()
 		http.Error(w, "Unsupported Request Operation", http.StatusMethodNotAllowed)
 	}
 }
