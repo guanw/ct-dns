@@ -56,9 +56,11 @@ func Test_decodeBody(t *testing.T) {
 	}
 }
 
+var httpMetrics = InitializeMetrics()
+
 func initializeTestServer(store *mocks.Store) *httptest.Server {
 	r := mux.NewRouter()
-	handler := NewHandler(store)
+	handler := NewHandler(store, httpMetrics)
 	handler.RegisterRoutes(r)
 	return httptest.NewServer(r)
 }

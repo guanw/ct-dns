@@ -20,6 +20,7 @@ import (
 	"github.com/guanw/ct-dns/plugins/storage/etcd"
 	"github.com/guanw/ct-dns/plugins/storage/redis"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -58,8 +59,11 @@ func main() {
 			log.Printf("grpc server listening at port %s", cfg.GRPCPort)
 
 			r := mux.NewRouter()
-			httpHandler := ctHttp.NewHandler(store)
+			httpMetrics := ctHttp.InitializeMetrics()
+			httpHandler := ctHttp.NewHandler(store, httpMetrics)
 			httpHandler.RegisterRoutes(r)
+
+			r.Handle("/metrics", promhttp.Handler())
 			log.Printf("http server listening at port %s", cfg.HTTPPort)
 			return http.ListenAndServe("0.0.0.0:"+cfg.HTTPPort, r)
 		},
