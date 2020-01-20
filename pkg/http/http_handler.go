@@ -41,51 +41,57 @@ func (aH *Handler) DiscoveryEndpointsV2(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		http.Error(w, errors.Wrap(err, "Failed to read endpoint v2 body from buff").Error(), http.StatusUnprocessableEntity)
 	}
-	var body map[string]interface{}
+
+	var body edsV2Req
 	if err := json.Unmarshal(buf.Bytes(), &body); err != nil {
 		http.Error(w, errors.Wrap(err, "Failed to decode the eds endpoint v2 request body").Error(), http.StatusUnprocessableEntity)
 	}
-	resources := body["resource_names"].([]interface{})
-	serviceName := resources[0].(string)
-	hosts, err := aH.Store.GetService(serviceName)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+
+	resp := edsV2Resp{
+		VersionInfo: "v1",
+		Resources:   []resourceV2{},
 	}
-	w.WriteHeader(http.StatusOK)
-	var eps []lbEndpointV2
-	for _, url := range hosts {
-		splitedStrings := strings.Split(url, ":")
-		host := splitedStrings[0]
-		port, err := strconv.Atoi(splitedStrings[1])
+	for _, r := range body.ResourceNames {
+		serviceName := r
+		hosts, err := aH.Store.GetService(serviceName)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		}
-		eps = append(eps, lbEndpointV2{
-			Endpoint: endpointV2{
-				Address: addressV2{
-					SocketAddress: socketAddressV2{
-						Address:   host,
-						PortValue: port,
+		var eps []lbEndpointV2
+		for _, url := range hosts {
+			host, port, err := parseHostPort(url)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadGateway)
+				return
+			}
+
+			eps = append(eps, lbEndpointV2{
+				Endpoint: endpointV2{
+					Address: addressV2{
+						SocketAddress: socketAddressV2{
+							Address:   host,
+							PortValue: port,
+						},
 					},
+				},
+			})
+		}
+		resp.Resources = append(resp.Resources, resourceV2{
+			Type:        "type.googleapis.com/envoy.api.v2.ClusterLoadAssignment",
+			ClusterName: serviceName,
+			Endpoints: []resourceEndpointV2{
+				{
+					LBEndpoints: eps,
 				},
 			},
 		})
 	}
-	resp := edsV2Resp{
-		VersionInfo: "v1",
-		Resources: []resourceV2{
-			{
-				Type:        "type.googleapis.com/envoy.api.v2.ClusterLoadAssignment",
-				ClusterName: serviceName,
-				Endpoints: []resourceEndpointV2{
-					{
-						LBEndpoints: eps,
-					},
-				},
-			},
-		},
-	}
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
+}
+
+type edsV2Req struct {
+	ResourceNames []string `json:"resource_names"`
 }
 
 type edsV2Resp struct {
@@ -127,17 +133,18 @@ func (aH *Handler) RegistrationServiceV1(w http.ResponseWriter, r *http.Request)
 	hosts, err := aH.Store.GetService(serviceName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
-	w.WriteHeader(http.StatusOK)
+
 	var hostsV1 []hostV1
 	for _, h := range hosts {
-		splitStrings := strings.Split(h, ":")
-		port, err := strconv.Atoi(splitStrings[1])
+		host, port, err := parseHostPort(h)
 		if err != nil {
-			http.Error(w, "Failed to parse port from host info", http.StatusUnprocessableEntity)
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
 		}
 		hostsV1 = append(hostsV1, hostV1{
-			IPAddress: splitStrings[0],
+			IPAddress: host,
 			Port:      port,
 			Tags: tagsV1{
 				AZ:                  "default", //TODO support availability zone
@@ -149,6 +156,7 @@ func (aH *Handler) RegistrationServiceV1(w http.ResponseWriter, r *http.Request)
 	resp := edsV1Resp{
 		Hosts: hostsV1,
 	}
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
 }
 
@@ -224,4 +232,16 @@ func decodeBody(in io.Reader) (postBody, error) {
 		return postBody{}, err
 	}
 	return b, nil
+}
+
+func parseHostPort(raw string) (string, int, error) {
+	splitStrings := strings.Split(raw, ":")
+	if len(splitStrings) < 2 {
+		return "", 0, errors.New("Host doesn't contain port info")
+	}
+	port, err := strconv.Atoi(splitStrings[1])
+	if err != nil {
+		return "", 0, errors.Wrap(err, "Failed to parse port from host info")
+	}
+	return splitStrings[0], port, nil
 }

@@ -7,6 +7,12 @@ $ brew tap tetratelabs/getenvoy
 $ brew install envoy
 ```
 
+### start envoy
+
+```
+$ envoy -c ./envoy_config.yaml -l debug
+```
+
 ### start local redis cluster
 
 ```
