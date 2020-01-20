@@ -5,3 +5,5 @@ IDL/**/*.pb.go
 vendor/
 coverage.txt
 *.code-workspace
+envoy/upstream/env
+**.http

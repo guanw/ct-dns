@@ -63,17 +63,17 @@ func initializeTestServer(store *mocks.Store) *httptest.Server {
 	return httptest.NewServer(r)
 }
 
-func makePostServiceReq(t *testing.T, body interface{}, server *httptest.Server) (io.ReadCloser, int) {
-	jsonBody, _ := json.Marshal(body)
-	req, err := http.NewRequest(http.MethodPost, server.URL+"/api/service", bytes.NewBuffer(jsonBody))
+func makePostReq(t *testing.T, server *httptest.Server, body string, path string) (io.ReadCloser, int) {
+	var jsonStr = []byte(body)
+	req, err := http.NewRequest(http.MethodPost, server.URL+path, bytes.NewBuffer(jsonStr))
 	assert.NoError(t, err)
 	res, err := httpClient.Do(req)
 	assert.NoError(t, err)
 	return res.Body, res.StatusCode
 }
 
-func makeGetServiceReq(t *testing.T, server *httptest.Server, serviceName string) (io.ReadCloser, int) {
-	req, err := http.NewRequest(http.MethodGet, server.URL+"/api/service/"+serviceName, bytes.NewBuffer([]byte{}))
+func makeGetReq(t *testing.T, server *httptest.Server, path, serviceName string) (io.ReadCloser, int) {
+	req, err := http.NewRequest(http.MethodGet, server.URL+path+serviceName, bytes.NewBuffer([]byte{}))
 	assert.NoError(t, err)
 	res, err := httpClient.Do(req)
 	assert.NoError(t, err)
@@ -99,11 +99,11 @@ func Test_GetRequest(t *testing.T) {
 	server := initializeTestServer(mockClient)
 	defer server.Close()
 
-	getRes, statusCode := makeGetServiceReq(t, server, "valid-service")
+	getRes, statusCode := makeGetReq(t, server, "/api/service/", "valid-service")
 	defer getRes.Close()
 	assert.Equal(t, 200, statusCode)
 
-	getRes, statusCode = makeGetServiceReq(t, server, "error-service")
+	getRes, statusCode = makeGetReq(t, server, "/api/service/", "error-service")
 	defer getRes.Close()
 	res, err := ioutil.ReadAll(getRes)
 	assert.NoError(t, err)
@@ -118,24 +118,118 @@ func Test_PostRequest(t *testing.T) {
 	server := initializeTestServer(mockClient)
 	defer server.Close()
 
-	postRes, statusCode := makePostServiceReq(t, postBody{
-		ServiceName: "valid-service",
-		Operation:   "add",
-		Host:        "192.0.0.1",
-	}, server)
-	defer postRes.Close()
-	assert.Equal(t, 200, statusCode)
+	t.Run("POST valid service", func(t *testing.T) {
+		postRes, statusCode := makePostReq(t, server, `{"serviceName":"valid-service","operation":"add","host":"192.0.0.1"}`, "/api/service")
+		defer postRes.Close()
+		assert.Equal(t, 200, statusCode)
+	})
 
-	postRes, statusCode = makePostServiceReq(t, postBody{
-		ServiceName: "error-service",
-	}, server)
-	defer postRes.Close()
-	assert.Equal(t, 200, statusCode)
+	t.Run("POST error service", func(t *testing.T) {
+		postRes, statusCode := makePostReq(t, server, `{"serviceName":"error-service"}`, "/api/service")
+		defer postRes.Close()
+		assert.Equal(t, 200, statusCode)
+	})
 
-	postRes, statusCode = makePostServiceReq(t, "", server)
-	defer postRes.Close()
-	res, err := ioutil.ReadAll(postRes)
-	assert.NoError(t, err)
-	assert.True(t, strings.Contains(string(res), "Failed to decode the Post request body"))
-	assert.Equal(t, 422, statusCode)
+	t.Run("POST with invalid json", func(t *testing.T) {
+		postRes, statusCode := makePostReq(t, server, ``, "/api/service")
+		defer postRes.Close()
+		res, err := ioutil.ReadAll(postRes)
+		assert.NoError(t, err)
+		assert.True(t, strings.Contains(string(res), "Failed to decode the Post request body"), "/api/service")
+		assert.Equal(t, 422, statusCode)
+	})
+}
+
+func Test_RegistrationServiceV1(t *testing.T) {
+	mockClient := &mocks.Store{}
+	mockClient.On("GetService", "valid-service").Return([]string{"192.0.0.1:8080"}, nil)
+	mockClient.On("GetService", "error-service").Return(nil, errors.New("service not found"))
+	mockClient.On("GetService", "service-without-port").Return([]string{"192.0.0.1"}, nil)
+	mockClient.On("GetService", "service-with-invalid-port").Return([]string{"192.0.0.1:abc"}, nil)
+	server := initializeTestServer(mockClient)
+	defer server.Close()
+
+	t.Run("get from valid service", func(t *testing.T) {
+		validServiceResp, statusCode := makeGetReq(t, server, "/v1/registration/", "valid-service")
+		defer validServiceResp.Close()
+		assert.Equal(t, 200, statusCode)
+		res, err := ioutil.ReadAll(validServiceResp)
+		assert.NoError(t, err)
+		var resp edsV1Resp
+		err = json.Unmarshal(res, &resp)
+		assert.NoError(t, err)
+		assert.Equal(t, "192.0.0.1", resp.Hosts[0].IPAddress)
+		assert.Equal(t, 8080, resp.Hosts[0].Port)
+	})
+
+	t.Run("get from error service", func(t *testing.T) {
+		errorServiceResp, statusCode := makeGetReq(t, server, "/v1/registration/", "error-service")
+		defer errorServiceResp.Close()
+		assert.Equal(t, 404, statusCode)
+	})
+
+	t.Run("get without port info", func(t *testing.T) {
+		serviceWithoutPortResp, statusCode := makeGetReq(t, server, "/v1/registration/", "service-without-port")
+		defer serviceWithoutPortResp.Close()
+		assert.Equal(t, 502, statusCode)
+	})
+
+	t.Run("get with invalid port", func(t *testing.T) {
+		serviceWithInvalidPort, statusCode := makeGetReq(t, server, "/v1/registration/", "service-with-invalid-port")
+		defer serviceWithInvalidPort.Close()
+		assert.Equal(t, 502, statusCode)
+	})
+}
+
+func Test_DiscoveryEndpointsV2(t *testing.T) {
+	mockClient := &mocks.Store{}
+	mockClient.On("GetService", "valid-service").Return([]string{"192.0.0.1:8080"}, nil)
+	mockClient.On("GetService", "error-service").Return(nil, errors.New("service not found"))
+	mockClient.On("GetService", "service-without-port").Return([]string{"192.0.0.1"}, nil)
+	mockClient.On("GetService", "service-with-invalid-port").Return([]string{"192.0.0.1:abc"}, nil)
+	server := initializeTestServer(mockClient)
+	defer server.Close()
+
+	t.Run("get with invalid body", func(t *testing.T) {
+		invalidServiceResp2, statusCode := makePostReq(t, server, `[]`, "/v2/discovery:endpoints")
+		defer invalidServiceResp2.Close()
+		assert.Equal(t, 422, statusCode)
+	})
+
+	t.Run("get with empty resource names", func(t *testing.T) {
+		invalidServiceResp1, statusCode := makePostReq(t, server, `{"resource_names": []}`, "/v2/discovery:endpoints")
+		defer invalidServiceResp1.Close()
+		assert.Equal(t, 200, statusCode)
+	})
+
+	t.Run("get from valid service", func(t *testing.T) {
+		validServiceResp, statusCode := makePostReq(t, server, `{"resource_names":["valid-service"]}`, "/v2/discovery:endpoints")
+		defer validServiceResp.Close()
+		assert.Equal(t, 200, statusCode)
+		res, err := ioutil.ReadAll(validServiceResp)
+		assert.NoError(t, err)
+		var resp edsV2Resp
+		err = json.Unmarshal(res, &resp)
+		assert.NoError(t, err)
+		assert.Equal(t, "192.0.0.1", resp.Resources[0].Endpoints[0].LBEndpoints[0].Endpoint.Address.SocketAddress.Address)
+		assert.Equal(t, 8080, resp.Resources[0].Endpoints[0].LBEndpoints[0].Endpoint.Address.SocketAddress.PortValue)
+	})
+
+	t.Run("get from error service", func(t *testing.T) {
+		validServiceResp, statusCode := makePostReq(t, server, `{"resource_names":["error-service"]}`, "/v2/discovery:endpoints")
+		defer validServiceResp.Close()
+		assert.Equal(t, 404, statusCode)
+	})
+
+	t.Run("get from service without port", func(t *testing.T) {
+		validServiceResp, statusCode := makePostReq(t, server, `{"resource_names":["service-without-port"]}`, "/v2/discovery:endpoints")
+		defer validServiceResp.Close()
+		assert.Equal(t, 502, statusCode)
+	})
+
+	t.Run("get from service with invalid port", func(t *testing.T) {
+		validServiceResp, statusCode := makePostReq(t, server, `{"resource_names":["service-with-invalid-port"]}`, "/v2/discovery:endpoints")
+		defer validServiceResp.Close()
+		assert.Equal(t, 502, statusCode)
+	})
 }
