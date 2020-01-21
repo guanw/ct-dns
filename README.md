@@ -5,7 +5,7 @@ ct-dns aims to provide easy deployment of service discovery service. It exposes
 - http server
 - grpc server
 
-for interfacing and
+for interfacing and supports
 
 - dynamodb
 - etcd
@@ -13,6 +13,8 @@ for interfacing and
 - memory (mainly for testing it out)
 
 for storage options
+
+It also supports integrating with envoy as eds cluster with examples.
 
 # Development
 
