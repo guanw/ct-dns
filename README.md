@@ -1,20 +1,20 @@
 # ct-dns - Distributed Service Discovery System
 
-ct-dns aims to provide easy deployment of service discovery service. It exposes
+ct-dns aims to provide easy deployment of service discovery service. 
 
-- http server
-- grpc server
+1. It supports following protocols
 
-for interfacing and supports
+- http
+- grpc
+
+2. It supports following storage options
 
 - dynamodb
 - etcd
 - redis
 - memory (mainly for testing it out)
 
-for storage options
-
-It also supports integrating with envoy as eds cluster with examples.
+3. It supports integrating with envoy as eds cluster with examples.
 
 # Development
 
