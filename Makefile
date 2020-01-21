@@ -48,7 +48,7 @@ etcd-kube:
 	echo "pass the public ip above to --etcd-endpoints"
 
 dynamodb-single-cluster:
-	docker run -d -it -p 8000:8000 dwmkerr/dynamodb -sharedDb
+	docker stop dns-dynamodb && docker rm dns-dynamodb && docker run -d -it -p 8000:8000 --name dns-dynamodb dwmkerr/dynamodb -sharedDb
 
 redis-single-cluster:
 	docker stop dns-redis && docker rm dns-redis && docker run -d -p 6379:6379 --name dns-redis redis
