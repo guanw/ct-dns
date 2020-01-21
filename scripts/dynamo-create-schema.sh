@@ -30,10 +30,10 @@ echo "Creating ct-dns table in dynamodb"
 echo "set endpoint: $endpoint"
 echo "set region: $region"
 
-aws dynamodb --endpoint-url $endpoint --region $region \
+
+aws dynamodb --endpoint-url "$endpoint" --region "$region" \
 	create-table \
 	--table-name service-discovery \
     --attribute-definitions AttributeName=Service,AttributeType=S AttributeName=Host,AttributeType=S \
 	--key-schema AttributeName=Service,KeyType=HASH AttributeName=Host,KeyType=RANGE \
 	--provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
-
