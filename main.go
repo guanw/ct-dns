@@ -43,7 +43,7 @@ func main() {
 			}
 			store := store.NewStore(client)
 
-			dnsServer := dns.NewServer(store)
+			dnsServer := dns.NewServer(store, dns.InitializeMetrics())
 			lis, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.GRPCPort))
 			if err != nil {
 				return errors.Wrap(err, "Failed to listen")
@@ -59,8 +59,7 @@ func main() {
 			log.Printf("grpc server listening at port %s", cfg.GRPCPort)
 
 			r := mux.NewRouter()
-			httpMetrics := ctHttp.InitializeMetrics()
-			httpHandler := ctHttp.NewHandler(store, httpMetrics)
+			httpHandler := ctHttp.NewHandler(store, ctHttp.InitializeMetrics())
 			httpHandler.RegisterRoutes(r)
 
 			r.Handle("/metrics", promhttp.Handler())

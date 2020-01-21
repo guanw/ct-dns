@@ -9,13 +9,15 @@ import (
 
 // DNSServer implements pb.DnsServer
 type DNSServer struct {
-	Store store.Store
+	Store   store.Store
+	Metrics *Metrics
 }
 
 // NewServer creates new DnsServer
-func NewServer(store store.Store) pb.DnsServer {
+func NewServer(store store.Store, metrics *Metrics) pb.DnsServer {
 	return &DNSServer{
-		Store: store,
+		Store:   store,
+		Metrics: metrics,
 	}
 }
 
@@ -23,6 +25,11 @@ func NewServer(store store.Store) pb.DnsServer {
 func (s *DNSServer) GetService(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, error) {
 	serviceName := req.GetServiceName()
 	hosts, err := s.Store.GetService(serviceName)
+	if err != nil {
+		s.Metrics.GetServiceFailure.Inc()
+	} else {
+		s.Metrics.GetServiceSuccess.Inc()
+	}
 	return &pb.GetResponse{
 		Hosts: hosts,
 	}, err
@@ -35,5 +42,10 @@ func (s *DNSServer) PostService(ctx context.Context, req *pb.PostRequest) (*pb.P
 		req.GetOperation(),
 		req.GetHost(),
 	)
+	if err != nil {
+		s.Metrics.PostServiceFailure.Inc()
+	} else {
+		s.Metrics.PostServiceSuccess.Inc()
+	}
 	return &pb.PostResponse{}, err
 }
