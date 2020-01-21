@@ -10,7 +10,7 @@ where:
 endpoint="http://localhost:8000"
 region="us-east-1"
 
-while getopts ':he:r:' option; do
+while getopts ":he:r:" option; do
     case $option in
         h )  echo "$usage"
             exit 0
@@ -26,9 +26,9 @@ while getopts ':he:r:' option; do
     esac
 done
 shift $((OPTIND-1))
-echo 'Creating ct-dns table in dynamodb'
-echo set endpoint: $endpoint
-echo set region: $region
+echo "Creating ct-dns table in dynamodb"
+echo "set endpoint: $endpoint"
+echo "set region: $region"
 
 aws dynamodb --endpoint-url $endpoint --region $region \
 	create-table \
