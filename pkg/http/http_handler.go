@@ -43,12 +43,14 @@ func (aH *Handler) DiscoveryEndpointsV2(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		aH.Metrics.V2DiscoveryFailure.Inc()
 		http.Error(w, errors.Wrap(err, "Failed to read endpoint v2 body from buff").Error(), http.StatusUnprocessableEntity)
+		return
 	}
 
 	var body edsV2Req
 	if err := json.Unmarshal(buf.Bytes(), &body); err != nil {
 		aH.Metrics.V2DiscoveryFailure.Inc()
 		http.Error(w, errors.Wrap(err, "Failed to decode the eds endpoint v2 request body").Error(), http.StatusUnprocessableEntity)
+		return
 	}
 
 	resp := edsV2Resp{
@@ -61,6 +63,7 @@ func (aH *Handler) DiscoveryEndpointsV2(w http.ResponseWriter, r *http.Request) 
 		if err != nil {
 			aH.Metrics.V2DiscoveryFailure.Inc()
 			http.Error(w, err.Error(), http.StatusNotFound)
+			return
 		}
 		var eps []lbEndpointV2
 		for _, url := range hosts {
@@ -224,7 +227,12 @@ func (aH *Handler) PostService(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_ = aH.Store.UpdateService(b.ServiceName, b.Operation, b.Host)
+		err = aH.Store.UpdateService(b.ServiceName, b.Operation, b.Host)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			aH.Metrics.PostServiceFailure.Inc()
+			return
+		}
 		// TODO think of way to log logic error and not panic
 		w.Header().Set("Content-Type", "application/json")
 		aH.Metrics.PostServiceSuccess.Inc()
