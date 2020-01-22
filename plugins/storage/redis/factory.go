@@ -2,6 +2,7 @@ package redis
 
 import (
 	"github.com/gomodule/redigo/redis"
+	"github.com/guanw/ct-dns/pkg/logging"
 	"github.com/guanw/ct-dns/storage"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -31,5 +32,6 @@ func NewFactory(v *viper.Viper) (storage.Client, error) {
 			return c, err
 		},
 	}
+	logging.GetLogger().WithField("Endpoint", b.Endpoint).Info("Creating redis pool")
 	return NewClient(pool), nil
 }

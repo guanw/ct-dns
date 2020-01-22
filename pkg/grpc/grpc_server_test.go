@@ -3,11 +3,11 @@ package grpc
 import (
 	"context"
 	"errors"
-	"log"
 	"net"
 	"testing"
 
 	pb "github.com/guanw/ct-dns/pkg/grpc/proto-gen"
+	"github.com/guanw/ct-dns/pkg/logging"
 	"github.com/guanw/ct-dns/pkg/store"
 	"github.com/guanw/ct-dns/pkg/store/mocks"
 	"github.com/prometheus/client_golang/prometheus/testutil"
@@ -29,7 +29,7 @@ func initialize(store store.Store) {
 	pb.RegisterDnsServer(s, NewServer(store, metrics))
 	go func() {
 		if err := s.Serve(lis); err != nil {
-			log.Fatalf("Server exited with error: %v", err)
+			logging.GetLogger().Fatalf("Server exited with error: %v", err)
 		}
 	}()
 }

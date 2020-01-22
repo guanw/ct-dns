@@ -3,6 +3,7 @@ package store
 import (
 	"encoding/json"
 
+	"github.com/guanw/ct-dns/pkg/logging"
 	storageInterface "github.com/guanw/ct-dns/storage"
 	"github.com/pkg/errors"
 )
@@ -19,6 +20,7 @@ type store struct {
 
 // NewStore creates new store instance
 func NewStore(client storageInterface.Client) Store {
+	logging.GetLogger().Info("Creating new store...")
 	return &store{
 		Client: client,
 	}

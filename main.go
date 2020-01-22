@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net"
 	"os"
 
@@ -14,6 +13,7 @@ import (
 	dns "github.com/guanw/ct-dns/pkg/grpc"
 	pb "github.com/guanw/ct-dns/pkg/grpc/proto-gen"
 	ctHttp "github.com/guanw/ct-dns/pkg/http"
+	"github.com/guanw/ct-dns/pkg/logging"
 	"github.com/guanw/ct-dns/pkg/store"
 	"github.com/guanw/ct-dns/plugins/storage"
 	"github.com/guanw/ct-dns/plugins/storage/dynamodb"
@@ -56,14 +56,14 @@ func main() {
 
 			go grpcServer.Serve(lis)
 			defer grpcServer.Stop()
-			log.Printf("grpc server listening at port %s", cfg.GRPCPort)
+			logging.GetLogger().Printf("grpc server listening at port %s", cfg.GRPCPort)
 
 			r := mux.NewRouter()
 			httpHandler := ctHttp.NewHandler(store, ctHttp.InitializeMetrics())
 			httpHandler.RegisterRoutes(r)
 
 			r.Handle("/metrics", promhttp.Handler())
-			log.Printf("http server listening at port %s", cfg.HTTPPort)
+			logging.GetLogger().Printf("http server listening at port %s", cfg.HTTPPort)
 			return http.ListenAndServe("0.0.0.0:"+cfg.HTTPPort, r)
 		},
 	}
