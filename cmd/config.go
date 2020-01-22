@@ -1,10 +1,9 @@
 package config
 
 import (
-	"fmt"
-	"log"
 	"os"
 
+	"github.com/guanw/ct-dns/pkg/logging"
 	"github.com/spf13/viper"
 )
 
@@ -23,7 +22,7 @@ type etcdConfig struct {
 // ReadConfig reads config file based on env
 func ReadConfig(path string) Config {
 	viper.AddConfigPath(path)
-	fmt.Println(os.Getenv("CT_DNS_ENV"))
+	logging.GetLogger().WithField("environment", os.Getenv("CT_DNS_ENV")).Info("Initializing config...")
 	if os.Getenv("CT_DNS_ENV") == "PRODUCTION" {
 		viper.SetConfigName("production")
 	} else {
@@ -31,12 +30,12 @@ func ReadConfig(path string) Config {
 	}
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatalln("Failed to read config", err)
+		logging.GetLogger().Fatalln("Failed to read config", err)
 	}
 	var c Config
 	err = viper.Unmarshal(&c)
 	if err != nil {
-		log.Fatalln("Failed to unmarshal config", err)
+		logging.GetLogger().Fatalln("Failed to unmarshal config", err)
 	}
 	return c
 }

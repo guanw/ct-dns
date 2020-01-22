@@ -4,7 +4,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/guanw/ct-dns/pkg/logging"
 	"github.com/guanw/ct-dns/storage"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -27,6 +29,10 @@ func NewFactory(v *viper.Viper) (storage.Client, error) {
 		Region:   aws.String(b.Region),
 		Endpoint: aws.String(b.Endpoint),
 	}))
+	logging.GetLogger().WithFields(logrus.Fields{
+		"Endpoint": b.Endpoint,
+		"Region":   b.Region,
+	}).Info("Creating dynamodb session")
 	db := dynamodb.New(s)
 	return NewClient(db), nil
 }
