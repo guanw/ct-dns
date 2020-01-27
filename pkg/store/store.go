@@ -8,12 +8,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Store defines interface
-type Store interface {
-	GetService(serviceName string) ([]string, error)
-	UpdateService(serviceName, operation, Host string) error
-}
-
 type store struct {
 	Client storageInterface.Client
 }
