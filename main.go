@@ -14,7 +14,7 @@ import (
 	pb "github.com/guanw/ct-dns/pkg/grpc/proto-gen"
 	ctHttp "github.com/guanw/ct-dns/pkg/http"
 	"github.com/guanw/ct-dns/pkg/logging"
-	"github.com/guanw/ct-dns/pkg/store"
+	ctStore "github.com/guanw/ct-dns/pkg/store"
 	"github.com/guanw/ct-dns/plugins/storage"
 	"github.com/guanw/ct-dns/plugins/storage/dynamodb"
 	"github.com/guanw/ct-dns/plugins/storage/etcd"
@@ -41,9 +41,10 @@ func main() {
 			if err != nil {
 				return errors.Wrap(err, "Failed to start storage client")
 			}
-			store := store.NewStore(client)
-
-			dnsServer := dns.NewServer(store, dns.InitializeMetrics())
+			store := ctStore.NewStore(client)
+			// TODO move 5 to config/from flag
+			retryStore := ctStore.NewRetryHandler(5, store)
+			dnsServer := dns.NewServer(retryStore, dns.InitializeMetrics())
 			lis, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.GRPCPort))
 			if err != nil {
 				return errors.Wrap(err, "Failed to listen")
@@ -59,7 +60,7 @@ func main() {
 			logging.GetLogger().Printf("grpc server listening at port %s", cfg.GRPCPort)
 
 			r := mux.NewRouter()
-			httpHandler := ctHttp.NewHandler(store, ctHttp.InitializeMetrics())
+			httpHandler := ctHttp.NewHandler(retryStore, ctHttp.InitializeMetrics())
 			httpHandler.RegisterRoutes(r)
 
 			r.Handle("/metrics", promhttp.Handler())
