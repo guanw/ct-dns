@@ -9,12 +9,20 @@ import (
 
 // Config contains config for ct-dns service
 type Config struct {
-	Etcd     []etcdConfig `yaml:"etcd"`
+	Etcd     []EtcdConfig `yaml:"etcd"`
 	HTTPPort string       `yaml:"httpport"`
 	GRPCPort string       `yaml:"grpcport"`
+	Redis    RedisConfig  `yaml:"redis"`
 }
 
-type etcdConfig struct {
+// EtcdConfig contains config for etcd cluster
+type EtcdConfig struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
+}
+
+// RedisConfig contains config for redis cluster
+type RedisConfig struct {
 	Host string `yaml:"host"`
 	Port string `yaml:"port"`
 }
@@ -23,9 +31,14 @@ type etcdConfig struct {
 func ReadConfig(path string) Config {
 	viper.AddConfigPath(path)
 	logging.GetLogger().WithField("environment", os.Getenv("CT_DNS_ENV")).Info("Initializing config...")
-	if os.Getenv("CT_DNS_ENV") == "PRODUCTION" {
+	env := os.Getenv("CT_DNS_ENV")
+
+	switch env {
+	case "PRODUCTION":
 		viper.SetConfigName("production")
-	} else {
+	case "KUBERNETERS-REDIS":
+		viper.SetConfigName("kubernetes-with-redis")
+	default:
 		viper.SetConfigName("development")
 	}
 	err := viper.ReadInConfig()
