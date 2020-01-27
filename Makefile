@@ -55,7 +55,7 @@ redis-single-cluster:
 	docker exec -it dns-redis sh
 
 docker-build:
-	docker build -t ct-dns .
+	docker build -t guanw0826/ct-dns .
 
 docker-run:
-	docker run -d --rm -p 8080:8080 -p 50051:50051 ct-dns
+	docker run -d --rm -p 8080:8080 -p 50051:50051 guanw0826/ct-dns

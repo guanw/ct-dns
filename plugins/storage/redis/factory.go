@@ -25,7 +25,7 @@ func NewFactory(v *viper.Viper) (storage.Client, error) {
 		MaxIdle:   80,
 		MaxActive: 12000, // max number of connections
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", b.Endpoint)
+			c, err := redis.Dial("tcp", "redis-master:6379") //b.Endpoint)
 			if err != nil {
 				return nil, errors.Wrap(err, "Failed to create redis pool")
 			}
