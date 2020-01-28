@@ -43,7 +43,7 @@ func main() {
 			}
 			store := ctStore.NewStore(client)
 			// TODO move 5 to config/from flag
-			retryStore := ctStore.NewRetryHandler(5, store)
+			retryStore := ctStore.NewRetryHandler(5, store, ctStore.InitializeMetrics())
 			dnsServer := dns.NewServer(retryStore, dns.InitializeMetrics())
 			lis, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.GRPCPort))
 			if err != nil {
