@@ -3,6 +3,7 @@ package storage
 import (
 	"testing"
 
+	config "github.com/guanw/ct-dns/cmd"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -40,7 +41,7 @@ func Test_NewFactory(t *testing.T) {
 		flagSet := new(pflag.FlagSet)
 		flagSet.String("storage-type", test.factoryType, "--storage-type <name>")
 		v.BindPFlags(flagSet)
-		f := NewFactory(v)
+		f := NewFactory(v, config.Config{})
 		_, err := f.Initialize()
 		if test.expectedErr {
 			assert.Error(t, err)
