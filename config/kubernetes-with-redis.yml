@@ -1,0 +1,5 @@
+httpport: 8080
+grpcport: 50051
+redis:
+  host: redis-master
+  port: 6379

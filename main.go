@@ -36,7 +36,7 @@ func main() {
 		Short: "ct-dns register and update host information for specific service",
 		Long:  `ct-dns register and update host information for specific service, User can configure different storage types using terminal flag`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			f := storage.NewFactory(v)
+			f := storage.NewFactory(v, cfg)
 			client, err := f.Initialize()
 			if err != nil {
 				return errors.Wrap(err, "Failed to start storage client")
