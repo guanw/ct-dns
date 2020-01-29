@@ -4,6 +4,12 @@
 $ minikube start
 ```
 
+# enable minikube ingress addon
+
+```
+$ minikube addons enable ingress
+```
+
 # apply deployment.yml
 
 ```
@@ -24,4 +30,10 @@ You should see something similar to the following
 
 ```
 $ kubectl port-forward <pod-name> 8080:8080 50050:50050
+```
+
+# or directly by
+
+```
+curl <minikube-ip>/api/health
 ```
