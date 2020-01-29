@@ -1,4 +1,4 @@
-# ct-dns - Distributed Service Discovery System
+# ct-dns - Service Discovery System
 
 <img src="https://scionplu.sirv.com/ct-dns.jpg" width="614" height="264" alt="" />
 
