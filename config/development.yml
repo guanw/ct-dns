@@ -1,3 +1,4 @@
+# Note: You should modify this file to reflect your own setup
 httpport: 8080
 grpcport: 50051
 etcd:
