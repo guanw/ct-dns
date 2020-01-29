@@ -1,6 +1,8 @@
 # ct-dns - Distributed Service Discovery System
 
-ct-dns aims to provide easy deployment of service discovery service. 
+<img src="https://scionplu.sirv.com/ct-dns.jpg" width="614" height="264" alt="" />
+
+ct-dns aims to provide easy deployment of service discovery service.
 
 1. It supports following protocols
 
